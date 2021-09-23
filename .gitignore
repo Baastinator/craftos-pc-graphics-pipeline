@@ -1,1 +1,6 @@
-home/debug/DFA2D.txt
+/home/debug/*
+home/debug/*
+/home/debug/
+home/debug/
+/home/debug
+home/debug
