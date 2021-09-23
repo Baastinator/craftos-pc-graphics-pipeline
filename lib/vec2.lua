@@ -31,5 +31,4 @@ return {
 	multiply = multiply,
 	new = new, 
 	rotate = rotate,
-	mathb = mathb
 }
