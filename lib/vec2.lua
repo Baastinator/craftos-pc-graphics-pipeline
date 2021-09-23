@@ -27,6 +27,8 @@ local function add(v1, v2)
 end
 
 return {
+	add = add,
+	multiply = multiply,
 	new = new, 
 	rotate = rotate,
 	mathb = mathb

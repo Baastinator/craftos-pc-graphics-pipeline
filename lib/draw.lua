@@ -4,32 +4,24 @@ local Grid = import("grid")
 local PixelSize = 10
 local debugVer = true
 
-local function densityToCol(D, LinMode)
-    if D > 1 then
-        if LinMode then
-            return math.log(Grid.wallColor,2)
-        else
-            return Grid.wallColor
-        end
+local function lightLevelToCol(D, LinMode)
+    LinMode = LinMode or false
+    D = D * 15.99 
+    D = math.floor(D)
+    if LinMode then
+        return D
     else
-        LinMode = LinMode or false
-        D = D * 15.99 
-        D = math.floor(D)
-        if LinMode then
-            return D
-        else
-            return 2^D
-        end
+        return 2^D
     end
 end
 
 local function drawFromArray1D(x, y, T, Grid)
     local P = {}
     local Pit = 0
-    P.currDensity = nil
+    P.currLightLevel = nil
     ---@diagnostic disable-next-line: undefined-field
     for i=1,table.getn(T) do
-        if densityToCol(T[i].density,true) == P.currDensity then
+        if lightLevelToCol(T[i].lightLevel,true) == P.currLightLevel then
            if P[Pit][2] == nil then
                P[Pit][2] = 1
            end
@@ -37,14 +29,14 @@ local function drawFromArray1D(x, y, T, Grid)
 
         else
             Pit = Pit + 1 
-            P.currDensity = densityToCol(T[i].density,true)
+            P.currLightLevel = lightLevelToCol(T[i].lightLevel,true)
             P[Pit] = {}
             P[Pit][1] = i
             P[Pit][2] = 1
-            P[Pit].col = P.currDensity
+            P[Pit].col = P.currLightLevel
         end
     end
-    P.currDensity = nil
+    P.currLightLevel = nil
     -- if y == 10 then
     --     local file = fs.open("1/home/debug/DFA.txt","w")
     --     file.write(textutils.serialise(P))
@@ -94,7 +86,7 @@ local function resetPalette()
 end
 
 return {
-    densityToCol = densityToCol,
+    lightLevelToCol = lightLevelToCol,
     PixelSize = PixelSize,
     drawFromArray1D = drawFromArray1D,
     drawFromArray2D = drawFromArray2D,

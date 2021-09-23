@@ -34,11 +34,11 @@ local function Init()
     term.clear()
     term.setGraphicsMode(1)
     draw.setPalette()
-    term.drawPixels(0,0,draw.densityToCol(0.0, false),res.t.x,res.t.y)
+    term.drawPixels(0,0,1,res.t.x,res.t.y)
 end
 
 local function Start()
-    
+    Grid.fill(2,2,1,1,1)
 end
 
 local function Update()

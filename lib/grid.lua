@@ -1,10 +1,9 @@
 --imports
-vector = import("vector")
+vec2 = import("vec2")
 mathb = import("mathb")
 
 --globals
 local grid = {}
-local wallColor = 2^7
 
 --functions
 
@@ -12,11 +11,7 @@ local function init(X, Y)
     for y=1,Y do
         grid[y] = {}
         for x=1,X do
-            grid[y][x] = {lightLevel=0, velocity=vector.new(0,0),wall=false}
-            if y == 1 or y == Y or x == 1 or x == X then
-                grid[y][x].wall = true
-                grid[y][x].lightLevel = 2
-            end
+            grid[y][x] = {lightLevel=0}
         end
     end
 end
@@ -43,16 +38,7 @@ local function GetlightLevel(X,Y)
 end
 
 local function SetlightLevel(X,Y,Value)
-    if Value == 2 then
-        grid[Y][X].lightLevel = 2
-        grid[Y][X].wall = true
-    elseif grid[Y][X].wall then
-        grid[Y][X].lightLevel = 2
-        return false
-    else
-        grid[Y][X].lightLevel = Value
-        return true
-    end
+    grid[Y][X].lightLevel = Value
 end
 
 local function GetVelocity(X,Y)
@@ -111,33 +97,33 @@ local function spreadGlobal(res)
                 --     end
                 -- end
             end
-            local vectorTemp = GetVelocity(x,y)
-            --local file = fs.open("1/home/debug/vectors.txt","w")
+            local vec2Temp = GetVelocity(x,y)
+            --local file = fs.open("1/home/debug/vec2s.txt","w")
             --file.write(textutils.serialise({y=y,x=x,den=oldGrid[y][x].lightLevel,nDen=nearDens}))
             --file.close()
 
             do --velocity thingy 
                 -- if x-1 ~= 1 then --left
                 --     if oldGrid[y][x-1].lightLevel <= 1 then
-                --         vectorTemp.x = vectorTemp.x + math.abs(oldGrid[y][x].lightLevel-nearDens.E)
+                --         vec2Temp.x = vec2Temp.x + math.abs(oldGrid[y][x].lightLevel-nearDens.E)
                 --     end
                 -- end
                 -- if x-1 ~= 1 then --left
                 --     if oldGrid[y][x-1].lightLevel <= 1 then
-                --         vectorTemp.x = vectorTemp.x - math.abs(oldGrid[y][x].lightLevel-nearDens.W)
+                --         vec2Temp.x = vec2Temp.x - math.abs(oldGrid[y][x].lightLevel-nearDens.W)
                 --     end
                 -- end
                 -- if y+1 ~= res.y then --up
                 --     if oldGrid[y+1][x].lightLevel <= 1 then
-                --         vectorTemp.y = vectorTemp.y + math.abs(oldGrid[y][x].lightLevel-nearDens.N)
+                --         vec2Temp.y = vec2Temp.y + math.abs(oldGrid[y][x].lightLevel-nearDens.N)
                 --     end
                 -- end
                 -- if y-1 ~= 1 then --down
                 --     if oldGrid[y-1][x].lightLevel <= 1 then
-                --         vectorTemp.y = vectorTemp.y - math.abs(oldGrid[y][x].lightLevel-nearDens.S)
+                --         vec2Temp.y = vec2Temp.y - math.abs(oldGrid[y][x].lightLevel-nearDens.S)
                 --     end
                 -- end
-                --SetVelocity(x,y,vectorTemp)
+                --SetVelocity(x,y,vec2Temp)
             end
             SetlightLevel(x,y,mathb.average(nearDens))
         end
@@ -158,8 +144,7 @@ return {
     GetVelocity = GetVelocity,
     SetVelocity = SetVelocity,
     fill = fill,
-    spreadGlobal = spreadGlobal,
-    wallColor = wallColor,
+    --spreadGlobal = spreadGlobal,
     GetlightLevel = GetlightLevel,
     SetlightLevel = SetlightLevel,
     grabSection = grabSection,
