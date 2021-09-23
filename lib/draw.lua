@@ -69,9 +69,7 @@ local function drawFromArray2D(x, y, Grid) -- FIX THIS
     for y1=1,table.getn(Grid.grid) do
         oT[y1] = drawFromArray1D(x-1,y+y1-1,Grid.grid[y1], Grid)
     end
-    -- local file = fs.open("1/home/debug/DFA2D.txt","w")
-    -- file.write(textutils.serialise(oT))
-    -- file.close()
+    debugLog(oT,"DFA2D")
 end
 
 local function f(x)

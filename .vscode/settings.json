@@ -3,6 +3,12 @@
         "shell",
         "colors",
         "term",
-        "import"
+        "import",
+        "parallel",
+        "keys",
+        "sleep",
+        "fs",
+        "textutils",
+        "debugLog"
     ]
 }
