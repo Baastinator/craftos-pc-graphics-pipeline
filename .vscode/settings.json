@@ -1,0 +1,8 @@
+{
+    "Lua.diagnostics.globals": [
+        "shell",
+        "colors",
+        "term",
+        "import"
+    ]
+}
