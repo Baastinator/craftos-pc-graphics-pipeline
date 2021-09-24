@@ -2,10 +2,12 @@
 
 local Grid = import("grid")
 local draw = import("draw")
+local Shader = import("shader")
 
 -- globals
 
 local res = {}
+local tres = {}
 local key
 local gameLoop = true
 local FPS = 10
@@ -26,18 +28,18 @@ end
 -- main functions
 
 local function Init()
-    res.t = {}
-    res.t.x, res.t.y = term.getSize(1)
-    res.x = math.floor(res.t.x / draw.PixelSize)
-    res.y = math.floor(res.t.y / draw.PixelSize)
+    tres.x, tres.y = term.getSize(1)
+    res.x = math.floor(tres.x / draw.PixelSize)
+    res.y = math.floor(tres.y / draw.PixelSize)
     Grid.init(res.x,res.y)
     term.clear()
     term.setGraphicsMode(1)
     draw.setPalette()
-    term.drawPixels(0,0,1,res.t.x,res.t.y)
+    term.drawPixels(0,0,1,tres.x,tres.y)
 end
 
 local function Start()
+    debugLog(res,"res")
     Grid.fill(2,2,1,1,1)
 end
 
