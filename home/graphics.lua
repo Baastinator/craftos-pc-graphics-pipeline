@@ -3,12 +3,15 @@
 local Grid = import("grid")
 local draw = import("draw")
 local Shader = import("shader")
+local vec3 = import("vec3")
+--local vec2 = import("vec2")
 
 -- globals
 
 local res = {}
 local tres = {}
 local key
+local debugMode = false
 local gameLoop = true
 local FPS = 10
 
@@ -25,6 +28,22 @@ local function userInput()
     end
 end
 
+local function setVertices()
+    Shader.vertArray.list = {
+        vec3.new(162,68,0),
+        vec3.new(298,68,0),
+        vec3.new(162,189,0),
+        vec3.new(298,189,0)
+    }
+end
+
+local function setIndices()
+    Shader.indArray.list = {
+        vec3.new(1,3,2),
+        --vec3.new(2,3,4)
+    }
+end
+
 -- main functions
 
 local function Init()
@@ -39,8 +58,12 @@ local function Init()
 end
 
 local function Start()
-    debugLog(res,"res")
-    Grid.fill(2,2,1,1,1)
+    setVertices()
+    setIndices()
+    Shader.renderVertices(Grid)
+    Shader.renderPolygons(Grid)
+    --debugLog(res,"res")
+    
 end
 
 local function Update()
@@ -51,8 +74,12 @@ local function Closing()
     term.clear()
     term.setGraphicsMode(0)
     draw.resetPalette()
-    term.clear()
-    term.setCursorPos(1,1)
+    if debugMode then
+    else
+        term.clear()
+        term.setCursorPos(1,1)
+    end
+    
 end
 
 -- main structure

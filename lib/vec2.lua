@@ -4,6 +4,13 @@ local function new(x, y)
 	return {x=x or 0, y=y or 0}
 end
 
+local function subtract(a,b)
+    return new(
+        a.x - b.x,
+		a.y - b.y
+    )
+end
+
 local function rotate(VectorInput, Angle, Origin)
 	Origin = Origin or new(0,0)
 	Angle = Angle * math.pi / 180 
@@ -19,14 +26,60 @@ local function rotate(VectorInput, Angle, Origin)
 end
 
 local function multiply(VectorInput, Scalar)
-	return new(VectorInput.x * Scalar, VectorInput.y * Scalar)
+	return new(
+		VectorInput.x * Scalar,
+		VectorInput.y * Scalar
+	)
 end
 
 local function add(v1, v2)
-	return new(v1.x + v2.x, v1.y + v2.y)
+	return new(
+		v1.x + v2.x,
+		v1.y + v2.y
+	)
+end
+
+local function dot(a,b)
+	return (
+		a.x * b.x +
+		a.y * b.y
+	)	
+end
+
+local function getLength(a)
+	return math.sqrt(a.x * a.x + a.y * a.y)
+end
+
+local function normalise(a)
+	local length = getLength(a)
+	return new(
+		a.x / length,
+		a.y / length
+	)
+end
+
+local function getAngle(a,b,radians,normalised)
+	radians = radians or false
+	normalised = normalised or true
+	local A = normalise(a)
+	local B = normalise(b)
+	local output = dot(A,B)
+	output = math.acos(output)
+	if radians == false then
+		output = output * 180 / math.pi
+	end
+	if normalised == false then
+		output = output * getLength(a) * getLength(b)
+	end
+	return output
 end
 
 return {
+	getLength = getLength,
+	getAngle = getAngle,
+	normalise = normalise,
+	dot = dot,
+	subtract = subtract,
 	add = add,
 	multiply = multiply,
 	new = new, 

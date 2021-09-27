@@ -61,7 +61,7 @@ local function drawFromArray2D(x, y, Grid) -- FIX THIS
     for y1=1,table.getn(Grid.grid) do
         oT[y1] = drawFromArray1D(x-1,y+y1-1,Grid.grid[y1], Grid)
     end
-    debugLog(oT,"DFA2D")
+    --debugLog(oT,"DFA2D")
 end
 
 local function f(x)
