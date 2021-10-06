@@ -1,6 +1,6 @@
 --imports
-vec2 = import("vec2")
-mathb = import("mathb")
+local vec2 = import("vec2")
+local mathb = import("mathb")
 
 --globals
 local grid = {}

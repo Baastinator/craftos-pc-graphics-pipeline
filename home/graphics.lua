@@ -61,7 +61,7 @@ local function Start()
     setVertices()
     setIndices()
     Shader.renderVertices(Grid)
-    Shader.renderPolygons(Grid)
+    Shader.renderPolygons(Grid,res)
     --debugLog(res,"res")
     
 end
@@ -79,7 +79,6 @@ local function Closing()
         term.clear()
         term.setCursorPos(1,1)
     end
-    
 end
 
 -- main structure

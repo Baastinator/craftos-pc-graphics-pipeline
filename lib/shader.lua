@@ -2,6 +2,7 @@ local vertArray = import("vertexArray")
 local indArray = import("indiceArray")
 local vec2 = import("vec2")
 local vec3 = import("vec3")
+local draw = import("draw")
 
 local camera = vec3.new(0,0,-1)
 local lightSource = vec3.new(1,0,1)
@@ -25,16 +26,55 @@ local function renderVertices(grid)
     --debugLog(debugT,"rendvert")
 end
 
-local function renderPolygons(grid)
+local function generateRaster(proj)
+    local rast = {}
+    rast.am = proj.a.x / proj.a.y
+    rast.bm = proj.b.x / proj.b.y
+    rast.cm = proj.c.x / proj.c.y
+    rast.as = proj.aStart
+    rast.bs = vec2.add(rast.as,proj.a)
+    rast.cs = vec2.add(rast.bs,proj.b)
+    return rast
+end
+
+local function renderPolygons(grid,res)
     local polyList = {}
     for i, v in ipairs(indArray.list) do
-        local currPoly = {}
+        --realisePolys
         polyList[i] = {}
+        local currPoly = {}
+        -- calculate and save poly vectors
         currPoly.a = vec3.subtract(vertArray.list[v.y],vertArray.list[v.x])
         currPoly.b = vec3.subtract(vertArray.list[v.z],vertArray.list[v.y])
         currPoly.c = vec3.subtract(vertArray.list[v.x],vertArray.list[v.z])
-        polyList[i] = currPoly
-        polyList[i].aStart = vertArray.list[v.x]
+        polyList[i].raw = currPoly
+        polyList[i].raw.aStart = vertArray.list[v.x]
+        
+        -- project poly vectors into 2d
+        polyList[i].proj = {}
+        polyList[i].proj.a = project(polyList[i].raw.a)
+        -- polyList[i].proj.aStart = project(polyList[i].raw.aStart)
+        polyList[i].proj.b = project(polyList[i].raw.b)
+        polyList[i].proj.c = project(polyList[i].raw.c)
+        
+        --rasterization value
+        local rast = {}
+        local proj = {
+            a = project(polyList[i].raw.a),
+            aStart = project(polyList[i].raw.aStart),
+            b = project(polyList[i].raw.b),
+            c = project(polyList[i].raw.c)
+        }
+        rast.am = proj.a.x / proj.a.y
+        rast.bm = proj.b.x / proj.b.y
+        rast.cm = proj.c.x / proj.c.y
+        rast.as = project(vertArray.list[v.x])
+        rast.bs = vec2.add(rast.as,proj.a)
+        rast.cs = vec2.add(rast.bs,proj.b)
+        polyList[i].rast = rast
+        rast = nil
+        proj = nil
+
         local cInv = vec3.scale(currPoly.c,-1)
         polyList[i].normal = vec3.normalise(vec3.cross(cInv,currPoly.a))
         if vec3.dot(polyList[i].normal,camera) < 0 then
@@ -46,6 +86,9 @@ local function renderPolygons(grid)
         else
             polyList[i].rendered = false
         end
+        if polyList[i].rendered == false then
+            polyList[i] = { rendered = false }
+        end
         debugLog(polyList,"polys")
     end
     local localGrid = {}
@@ -54,9 +97,6 @@ local function renderPolygons(grid)
         for i2, v2 in ipairs(grid.grid[i]) do
             localGrid[i][i2] = 0
         end
-    end
-    for i, v in ipairs(polyList) do
-
     end
 end
 
