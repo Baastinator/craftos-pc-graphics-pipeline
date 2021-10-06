@@ -1,1 +1,3 @@
 /home/debug/*
+lib/vec4.lua
+lib/mat4.lua

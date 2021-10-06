@@ -7,37 +7,49 @@ local draw = import("draw")
 local camera = vec3.new(0,0,-1)
 local lightSource = vec3.new(1,0,1)
 
+local res
+
+local projIt = 0
+
 local function project(vec3input)
+    vec3input.y = -vec3input.y
+    vec3input = vec3.add(vec3input,vec3.new(1,1,0))
     local output = vec2.new(
-        vec3input.x,
-        vec3input.y
+        math.floor(vec3input.x * res.x / 2),
+        math.floor(vec3input.y * res.y / 2)
     )
+    if output.x >= res.x then
+        output.x = res.x-1
+    elseif output.x <= 0 then
+        output.x = 1
+    end
+    if output.y >= res.y then
+        output.y = res.y-1
+    elseif output.y <= 0 then
+        output.x = 1
+    end
+    -- debugLog(output,"project"..projIt)
+    projIt = projIt + 1
     return output
+end
+
+local function setRes(Res)
+    res = Res
 end
 
 local function renderVertices(grid)
     local debugT = {}
     for i, v in ipairs(vertArray.list) do
-        debugT.v = v
+        debugT[i] = {}
+        debugT[i].v = v
         local pos = project(v)
-        debugT.pos = pos
+        debugT[i].pos = pos
         grid.SetlightLevel(pos.x,pos.y,1)
     end
-    --debugLog(debugT,"rendvert")
+    -- debugLog(debugT,"rendvert")
 end
 
-local function generateRaster(proj)
-    local rast = {}
-    rast.am = proj.a.x / proj.a.y
-    rast.bm = proj.b.x / proj.b.y
-    rast.cm = proj.c.x / proj.c.y
-    rast.as = proj.aStart
-    rast.bs = vec2.add(rast.as,proj.a)
-    rast.cs = vec2.add(rast.bs,proj.b)
-    return rast
-end
-
-local function renderPolygons(grid,res)
+local function renderPolygons(grid)
     local polyList = {}
     for i, v in ipairs(indArray.list) do
         --realisePolys
@@ -101,6 +113,7 @@ local function renderPolygons(grid,res)
 end
 
 return {
+    setRes = setRes,
     renderPolygons = renderPolygons,
     renderVertices = renderVertices,
     project = project,

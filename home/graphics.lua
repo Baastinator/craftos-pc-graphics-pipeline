@@ -30,10 +30,15 @@ end
 
 local function setVertices()
     Shader.vertArray.list = {
-        vec3.new(162,68,0),
-        vec3.new(298,68,0),
-        vec3.new(162,189,0),
-        vec3.new(298,189,0)
+        vec3.new(-0.5,-0.5,0),
+        vec3.new(0.5,-0.5,0),
+        vec3.new(-0,0.5,0),
+        vec3.new(0.5,0.5,0)
+
+        -- vec3.new(162,68,0),
+        -- vec3.new(298,68,0),
+        -- vec3.new(162,189,0),
+        -- vec3.new(298,189,0)
     }
 end
 
@@ -50,6 +55,7 @@ local function Init()
     tres.x, tres.y = term.getSize(1)
     res.x = math.floor(tres.x / draw.PixelSize)
     res.y = math.floor(tres.y / draw.PixelSize)
+    Shader.setRes(res)
     Grid.init(res.x,res.y)
     term.clear()
     term.setGraphicsMode(1)
@@ -61,7 +67,7 @@ local function Start()
     setVertices()
     setIndices()
     Shader.renderVertices(Grid)
-    Shader.renderPolygons(Grid,res)
+    --Shader.renderPolygons(Grid)
     --debugLog(res,"res")
     
 end
