@@ -30,21 +30,16 @@ end
 
 local function setVertices()
     Shader.vertArray.list = {
-        vec3.new(-0.5,-0.5,0),
-        vec3.new(0.5,-0.5,0),
-        vec3.new(-0,0.5,0),
-        vec3.new(0.5,0.5,0)
-
-        -- vec3.new(162,68,0),
-        -- vec3.new(298,68,0),
-        -- vec3.new(162,189,0),
-        -- vec3.new(298,189,0)
+        vec3.new(-0.5,-0.5,-0),
+        vec3.new(0.5,-0.5,-0),
+        vec3.new(-0.5,0.5,-0),
+        vec3.new(0.5,0.5,-0)
     }
 end
 
 local function setIndices()
     Shader.indArray.list = {
-        vec3.new(1,3,2),
+        vec3.new(1,2,3),
         --vec3.new(2,3,4)
     }
 end
@@ -67,8 +62,8 @@ local function Start()
     setVertices()
     setIndices()
     Shader.renderVertices(Grid)
-    --Shader.renderPolygons(Grid)
-    --debugLog(res,"res")
+    Shader.renderPolygons(Grid)
+    debugLog(res,"res")
     
 end
 

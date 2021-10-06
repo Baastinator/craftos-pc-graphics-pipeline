@@ -13,10 +13,13 @@ local projIt = 0
 
 local function project(vec3input)
     vec3input.y = -vec3input.y
+    vec3input.z = vec3input.z + 2
+    vec3input.x = vec3input.x / vec3input.z
+    vec3input.y = vec3input.y / vec3input.z
     vec3input = vec3.add(vec3input,vec3.new(1,1,0))
     local output = vec2.new(
-        math.floor(vec3input.x * res.x / 2),
-        math.floor(vec3input.y * res.y / 2)
+        math.floor((vec3input.x) * res.x / 2),
+        math.floor((vec3input.y) * res.y / 2)
     )
     if output.x >= res.x then
         output.x = res.x-1
@@ -102,6 +105,7 @@ local function renderPolygons(grid)
             polyList[i] = { rendered = false }
         end
         debugLog(polyList,"polys")
+        debugLog(currPoly,"currPoly")
     end
     local localGrid = {}
     for i, v in ipairs(grid.grid) do
