@@ -1,3 +1,4 @@
+import("vec4")
 
 local vector3 = {
     add = function (a,b)
@@ -58,6 +59,9 @@ local vector3 = {
             a.y / a:getLength(),
             a.z / a:getLength()
         )
+    end,
+    vector4 = function ( a )
+        return vec4(a.x,a.y,a.z,1)
     end
 }
 
@@ -70,7 +74,7 @@ local MT = {
         cross = vector3.cross,
         getLength = vector3.getLength,
         normalise = vector3.normalise,
-        normaliseSelf = vector3.normaliseSelf
+        vec4 = vector3.vector4
     },
     __tostring = vector3.tostring,
     __mul = vector3.mult

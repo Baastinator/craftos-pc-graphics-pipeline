@@ -79,7 +79,8 @@ local MT = {
     __index = {
         toTable = vector4.toTable,
         toVector = vector4.toVector,
-        getLength = vector4.getLength
+        getLength = vector4.getLength,
+        normalise = vector4.normalise
     },
     __mul = vector4.mult,
     __tostring = vector4.tostring,

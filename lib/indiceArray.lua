@@ -1,4 +1,4 @@
-local vec3 = import("vec3")
+import("vec3")
 
 local list = {}
 

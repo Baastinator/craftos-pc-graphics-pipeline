@@ -3,8 +3,8 @@
 local Grid = import("grid")
 local draw = import("draw")
 local Shader = import("shader")
-local vec3 = import("vec3")
---local vec2 = import("vec2")
+import("vec3")
+--import("vec2")
 
 -- globals
 
@@ -30,17 +30,17 @@ end
 
 local function setVertices()
     Shader.vertArray.list = {
-        vec3.new(-0.5,-0.5,-0),
-        vec3.new(0.5,-0.5,-0),
-        vec3.new(-0.5,0.5,-0),
-        vec3.new(0.5,0.5,-0)
+        vec3(-0.5,-0.5,-0),
+        vec3(0.5,-0.5,-0),
+        vec3(-0.5,0.5,-0),
+        vec3(0.5,0.5,-0)
     }
 end
 
 local function setIndices()
     Shader.indArray.list = {
-        vec3.new(1,2,3),
-        --vec3.new(2,3,4)
+        vec3(1,2,3),
+        --vec3(2,3,4)
     }
 end
 
@@ -61,8 +61,7 @@ end
 local function Start()
     setVertices()
     setIndices()
-    Shader.renderVertices(Grid)
-    Shader.renderPolygons(Grid)
+    --Shader.renderPolygons(Grid)
     debugLog(res,"res")
     
 end

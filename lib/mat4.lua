@@ -1,4 +1,5 @@
 import("vec4")
+local mathb = import("mathb")
 
 local matrix4x4 = {
     identity = function()
@@ -15,10 +16,15 @@ local matrix4x4 = {
                 str = str.."\n"
             end
             for x=1,4 do
+                local val = mathb.round(m[y][x],5)
+                local placeholder = ""
+                for i=#tostring(val),8 do
+                    placeholder = placeholder.." "
+                end
                 if (x > 1) then
                     str = str..","
                 end
-                str = str..m[y][x]
+                str = str..val..placeholder
             end
         end
         return str

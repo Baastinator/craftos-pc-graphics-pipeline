@@ -1,87 +1,79 @@
-local mathb = dofile("lib/mathb.lua")
 
-local function new(x, y)
-	return {x=x or 0, y=y or 0}
-end
+local vector3 = {
+    add = function (a,b)
+        return vec2(
+            a.x + b.x,
+            a.y + b.y,
+            a.z + b.z
+        )
+    end,
+    subtract = function ( a,b )
+        return vec2(
+            a.x - b.x,
+            a.y - b.y,
+            a.z - b.z
+        )
+    end,
+    mult = function(s,o)
+        if type(o) == "table" then
+            if (o.type == "vec2") then
+                return (
+                    s.x * o.x +
+                    s.y * o.y
+                )
+            else
+                error("vec2 mult: invalid type")
+            end
+        elseif type(o) == "number" then
+            return vec3(
+                s.x * o,
+                s.y * o
+            )
+        end
+    end,
+    tostring = function(a)
+        return a.x..","..a.y
+    end,
+    toTable = function (a)
+        return {a.x,a.y}
+    end,
+    toVector = function ( t )
+        return vec2(t[1],t[2])
+    end,
+    getLength = function ( a )
+        return math.sqrt( a.x * a.x + a.y * a.y)
+    end,
+    normalise = function (a)
+        return vec2(
+            a.x / a:getLength(),
+            a.y / a:getLength()
+        )
+    end
+}
 
-local function subtract(a,b)
-    return new(
-        a.x - b.x,
-		a.y - b.y
+local MT = {
+    __add = vector3.add,
+    __sub = vector3.subtract,
+    __index = {
+        toTable = vector3.toTable,
+        toVector = vector3.toVector,
+        cross = vector3.cross,
+        getLength = vector3.getLength,
+        normalise = vector3.normalise
+    },
+    __tostring = vector3.tostring,
+    __mul = vector3.mult
+}
+
+function vec2(x,y,z)
+    return setmetatable(
+        {
+            type = "vec2",
+            x = x or 0,
+            y = y or 0,
+            z = z or 0
+        }, MT
     )
 end
 
-local function rotate(VectorInput, Angle, Origin)
-	Origin = Origin or new(0,0)
-	Angle = Angle * math.pi / 180 
-	local Product = new(0,0)
-	local ShiftedVector = new(VectorInput.x - Origin.x,VectorInput.y - Origin.y)
-	Product.x = ShiftedVector.x * math.cos(Angle) - ShiftedVector.y * math.sin(Angle)
-	Product.y = ShiftedVector.x * math.sin(Angle) + ShiftedVector.y * math.cos(Angle)
-	Product.x = Product.x + Origin.x
-	Product.y = Product.y + Origin.y
-	Product.x = mathb.round(Product.x,8)
-	Product.y = mathb.round(Product.y,8)
-	return Product
-end
 
-local function multiply(VectorInput, Scalar)
-	return new(
-		VectorInput.x * Scalar,
-		VectorInput.y * Scalar
-	)
-end
-
-local function add(v1, v2)
-	return new(
-		v1.x + v2.x,
-		v1.y + v2.y
-	)
-end
-
-local function dot(a,b)
-	return (
-		a.x * b.x +
-		a.y * b.y
-	)	
-end
-
-local function getLength(a)
-	return math.sqrt(a.x * a.x + a.y * a.y)
-end
-
-local function normalise(a)
-	local length = getLength(a)
-	return new(
-		a.x / length,
-		a.y / length
-	)
-end
-
-local function getAngle(a,b,radians,normalised)
-	radians = radians or false
-	normalised = normalised or true
-	local A = normalise(a)
-	local B = normalise(b)
-	local output = dot(A,B)
-	output = math.acos(output)
-	if radians == false then
-		output = output * 180 / math.pi
-	end
-	if normalised == false then
-		output = output * getLength(a) * getLength(b)
-	end
-	return output
-end
-
-return {
-	getLength = getLength,
-	getAngle = getAngle,
-	normalise = normalise,
-	dot = dot,
-	subtract = subtract,
-	add = add,
-	multiply = multiply,
-	new = new, 
-	rotate = rotate,
-}

@@ -37,11 +37,6 @@ local function drawFromArray1D(x, y, T, Grid)
         end
     end
     P.currLightLevel = nil
-    -- if y == 10 then
-    --     local file = fs.open("1/home/debug/DFA.txt","w")
-    --     file.write(textutils.serialise(P))
-    --     file.close()
-    -- end
 ---@diagnostic disable-next-line: undefined-field
     for i=1,table.getn(P) do --NOCH NICHT FERTIG
         term.drawPixels(
