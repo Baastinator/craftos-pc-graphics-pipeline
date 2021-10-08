@@ -72,7 +72,7 @@ local function renderPolygons(grid)
         polyList[i].proj.b = project(polyList[i].raw.b)
         polyList[i].proj.c = project(polyList[i].raw.c)
         
-        --rasterization value
+        --rasterization values
         local rast = {}
         local proj = {
             a = project(polyList[i].raw.a),

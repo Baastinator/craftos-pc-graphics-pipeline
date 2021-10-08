@@ -10,5 +10,8 @@
         "fs",
         "textutils",
         "debugLog"
+    ],
+    "Lua.diagnostics.disable": [
+        "lowercase-global"
     ]
 }

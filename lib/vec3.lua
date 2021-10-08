@@ -1,82 +1,90 @@
 
-local function new(x,y,z)
-    return {x=x or 0,y=y or 0,z=z or 0}
-end
-
-local function add(v,o)
-    return new(
-        v.x+o.x,
-        v.y+o.y,
-        v.z+o.z
-    )
-end
-
-local function subtract(a,b)
-    return new(
-        a.x-b.x,
-        a.y-b.y,
-        a.z-b.z
-    )    
-end
-
-local function scale(v,s)
-    return new(
-        v.x * s,
-        v.y * s,
-        v.z * s
-    )
-end
-
-local function cross(a,b)
-    return new(
-        a.y * b.z - a.z * b.y,
-        a.z * b.x - a.x * b.z,
-        a.x * b.y - a.y * b.x
-    )
-end
-
-local function getLength(a)
-    return math.sqrt(
-        a.x * a.x +
-        a.y * a.y +
-        a.z * a.z
-    )
-end
-
-local function normalise(a)
-    local length = getLength(a)
-    return new(
-        a.x / length,
-        a.y / length,
-        a.z / length
-    )
-end
-
-local function dot(a, b)
-    return (
-        a.x * b.x +
-        a.y * b.y +
-        a.z * b.z
-    )
-end
-
-
-local T = {
-    getLength = getLength,
-    normalise = normalise,
-    subtract = subtract,
-    dot = dot,
-    cross = cross,
-    scale = scale,
-    new = new,
-    add = add
+local vector3 = {
+    add = function (a,b)
+        return vec3(
+            a.x + b.x,
+            a.y + b.y,
+            a.z + b.z
+        )
+    end,
+    subtract = function ( a,b )
+        return vec3(
+            a.x - b.x,
+            a.y - b.y,
+            a.z - b.z
+        )
+    end,
+    mult = function(s,o)
+        if type(o) == "table" then
+            if (o.type == "vec3") then
+                return (
+                    s.x * o.x +
+                    s.y * o.y +
+                    s.z * o.z
+                )
+            else
+                error("vec3 mult: invalid type")
+            end
+        elseif type(o) == "number" then
+            return vec3(
+                s.x * o,
+                s.y * o,
+                s.z * o
+            )
+        end
+    end,
+    tostring = function(a)
+        return a.x..","..a.y..","..a.z
+    end,
+    toTable = function (a)
+        return {a.x,a.y,a.z}
+    end,
+    toVector = function ( t )
+        return vec3(t[1],t[2],t[3])
+    end,
+    cross = function (a,b)
+        return vec3(
+            a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x
+        )
+    end,
+    getLength = function ( a )
+        return math.sqrt( a.x * a.x + a.y * a.y + a.z * a.z )
+    end,
+    normalise = function (a)
+        return vec3(
+            a.x / a:getLength(),
+            a.y / a:getLength(),
+            a.z / a:getLength()
+        )
+    end
 }
+
 local MT = {
-    __add = add,
-    __mul = scale,
-    __sub = subtract
-
+    __add = vector3.add,
+    __sub = vector3.subtract,
+    __index = {
+        toTable = vector3.toTable,
+        toVector = vector3.toVector,
+        cross = vector3.cross,
+        getLength = vector3.getLength,
+        normalise = vector3.normalise,
+        normaliseSelf = vector3.normaliseSelf
+    },
+    __tostring = vector3.tostring,
+    __mul = vector3.mult
 }
-setmetatable(T,MT)
 
-return T
+function vec3(x,y,z)
+    return setmetatable(
+        {
+            type = "vec3",
+            x = x or 0,
+            y = y or 0,
+            z = z or 0
+        }, MT
+    )
+end
+
+
