@@ -33,14 +33,12 @@ end
 
 cube = {
     Vert = {
-        vec3(-30,-30,-30),
-        vec3(30,-30,-30),
-        vec3(-30,30,-30),
-        vec3(30,30,-30),
-        vec3(-30,-30,30),
-        vec3(30,-30,30),
-        vec3(-30,30,30),
-        vec3(30,30,30)
+        vec3(0,30,0),
+        vec3(26,15,0),
+        vec3(8,15,25),
+        vec3(-21,15,15),
+        vec3(-21,15,-15),
+        vec3(8,15,-25),
     },
     Inde = {
         vec3(3,2,4),
@@ -64,11 +62,15 @@ cube = {
 }
 
 local function setVertices()
-    Shader.vertArray.list = cube.Vert
+    Shader.vertArray.list = {
+
+    }
 end
 
 local function setIndices()
-    Shader.indArray.list = cube.Inde
+    Shader.indArray.list = {
+        
+    } 
 end
 
 -- main functions
@@ -88,16 +90,19 @@ end
 local function Start()
     setVertices()
     setIndices()
-    paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
+    --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     --Shader.renderPolygons(Grid)
     -- debugLog(res,"res")
 end
 
 local function Update()
     Grid.init(res.x,res.y)
-    -- Shader.renderVertices(Grid)
+    --Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
-    -- Shader.renderWireframe(Grid)
+    Shader.renderWireframe(Grid)
+    Shader.model.rot = Shader.model.rot + vec3(5,5,0)
+    Shader.cameraTransport.tra = vec3(0,30,-100)
+    Shader.cameraTransport.rot = vec3(-15,0,0)
 end
 
 local function Closing()

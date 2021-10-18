@@ -62,6 +62,11 @@ local projections = {
 }
 
 local function project(vec3input)
+    do
+        if cameraTransport.rot.x > 360 then
+            cameraTransport.rot.x = cameraTransport.rot.x - 360
+        end
+    end
     local input = vec3input:vec4()
     local proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
     local scal = projections.ScalMatrix(model.sca)
