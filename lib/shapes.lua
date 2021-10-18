@@ -1,4 +1,4 @@
-local polyhedron = {
+local icosahedron = {
     ver = {
         vec3(0,30,0),
 
