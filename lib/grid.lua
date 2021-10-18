@@ -16,16 +16,19 @@ local function GetlightLevel(X,Y)
     return grid[Y][X].lightLevel
 end
 
-local function NDCtoScreen(X,Y,res) 
+local function NDCtoScreen(X,Y,Z,res) 
     X = math.floor( (X+1) * res.x /2)
     Y = math.floor( (Y+1) * res.y /2)
-    return X,Y
+    Z = math.floor( (Z+1) * res.x /2)
+    return X,Y,Z
 end
 
-local function SetlightLevel(X,Y,Z,Value)
----@diagnostic disable-next-line: undefined-field
-    X,Y = NDCtoScreen(X,Y,vec2(res.x,res.y))
-    -- debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
+local function SetlightLevel(X,Y,Z,Value,NDC)
+    NDC = NDC or true
+    if NDC then
+        X,Y,Z = NDCtoScreen(X,Y,Z,vec2(res.x,res.y))
+    end
+    debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
     if Z < grid[Y][X].depth then
         grid[Y][X].lightLevel = Value
         grid[Y][X].depth = Z

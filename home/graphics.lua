@@ -3,6 +3,7 @@
 local Grid = import("grid")
 local draw = import("draw")
 local Shader = import("shader")
+local paint = import("paint")
 import("vec3")
 --import("vec2")
 
@@ -30,8 +31,8 @@ local function userInput()
     end
 end
 
-local function setVertices()
-    Shader.vertArray.list = {
+cube = {
+    Vert = {
         vec3(-30,-30,-30),
         vec3(30,-30,-30),
         vec3(-30,30,-30),
@@ -40,13 +41,10 @@ local function setVertices()
         vec3(30,-30,30),
         vec3(-30,30,30),
         vec3(30,30,30)
-    }
-end
-
-local function setIndices()
-    Shader.indArray.list = {
+    },
+    Inde = {
+        vec3(3,2,4),
         vec3(1,2,3),
-        vec3(2,4,3),
 
         vec3(2,4,6),
         vec3(6,8,4),
@@ -54,8 +52,8 @@ local function setIndices()
         vec3(4,3,8),
         vec3(3,8,7),
         
-        vec3(1,2,6),
-        vec3(6,5,1),
+        vec3(5,2,6),
+        vec3(2,5,1),
         
         vec3(5,7,1),
         vec3(1,3,7),
@@ -63,6 +61,14 @@ local function setIndices()
         vec3(6,5,8),
         vec3(8,5,7),
     }
+}
+
+local function setVertices()
+    Shader.vertArray.list = cube.Vert
+end
+
+local function setIndices()
+    Shader.indArray.list = cube.Inde
 end
 
 -- main functions
@@ -82,6 +88,7 @@ end
 local function Start()
     setVertices()
     setIndices()
+    paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     --Shader.renderPolygons(Grid)
     -- debugLog(res,"res")
 end
@@ -90,8 +97,7 @@ local function Update()
     Grid.init(res.x,res.y)
     -- Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
-    Shader.renderWireframe(Grid)
-    Shader.model.rot = Shader.model.rot + vec3(1,1,1)
+    -- Shader.renderWireframe(Grid)
 end
 
 local function Closing()

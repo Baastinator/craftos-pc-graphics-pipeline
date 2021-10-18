@@ -10,7 +10,7 @@ local cameraVector = vec3(0,0,-1)
 local lightSource = vec3(1,0,1)
 
 local model = {
-    rot = vec3(90,0,0),
+    rot = vec3(0,0,0),
     sca = vec3(1,1,1),
     tra = vec3(0,0,0)
 }
@@ -48,7 +48,7 @@ local projections = {
     RotaMatrix = function ( eulerVec3 )
         eulerVec3 = eulerVec3 * (math.pi/180)
         local sg, sb, sa = math.sin(eulerVec3.x),math.sin(eulerVec3.y),math.sin(eulerVec3.z)
-        local cg, cb, ca = math.cos(eulerVec3.x),math.cos(eulerVec3.z),math.cos(eulerVec3.z)
+        local cg, cb, ca = math.cos(eulerVec3.x),math.cos(eulerVec3.y),math.cos(eulerVec3.z)
         local m = mat4()
         -- m[1] = {ca*cb, (ca*sb*sg) - (sa*cg), (ca*sb*cg) + (sa*sg), 0}
         -- m[2] = {sa*cb, (sa*sb*sg) + (ca*cg), (sa*sb*cg) - (ca*sg), 0}
@@ -101,12 +101,12 @@ local function renderWireframe(grid)
         currPoly.a = project(vertArray.list[v.x])
         currPoly.b = project(vertArray.list[v.y])
         currPoly.c = project(vertArray.list[v.z])
-        currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,res),currPoly.a.z)
-        currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,res),currPoly.b.z)
-        currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,res),currPoly.c.z)
-        paintutils.drawLine(currPoly.a.x, currPoly.a.y, currPoly.b.x, currPoly.b.y, 2^15)
-        paintutils.drawLine(currPoly.b.x, currPoly.b.y, currPoly.c.x, currPoly.c.y, 2^15)
-        paintutils.drawLine(currPoly.c.x, currPoly.c.y, currPoly.a.x, currPoly.a.y, 2^15)
+        currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,currPoly.a.z,res))
+        currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,currPoly.b.z,res))
+        currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,currPoly.c.z,res))
+        paintutils.drawLine(currPoly.a.x*2, currPoly.a.y*2, currPoly.b.x*2, currPoly.b.y*2, 2^15)
+        paintutils.drawLine(currPoly.b.x*2, currPoly.b.y*2, currPoly.c.x*2, currPoly.c.y*2, 2^15)
+        paintutils.drawLine(currPoly.c.x*2, currPoly.c.y*2, currPoly.a.x*2, currPoly.a.y*2, 2^15)
         -- debugLog({currPoly,"a"},"polies"..i)
     end
 end
