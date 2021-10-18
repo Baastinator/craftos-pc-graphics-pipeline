@@ -9,7 +9,8 @@
         "sleep",
         "fs",
         "textutils",
-        "debugLog"
+        "debugLog",
+        "paintutils"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"

@@ -1,17 +1,15 @@
 
-local vector3 = {
+local vector2 = {
     add = function (a,b)
         return vec2(
             a.x + b.x,
-            a.y + b.y,
-            a.z + b.z
+            a.y + b.y
         )
     end,
     subtract = function ( a,b )
         return vec2(
             a.x - b.x,
-            a.y - b.y,
-            a.z - b.z
+            a.y - b.y
         )
     end,
     mult = function(s,o)
@@ -52,26 +50,24 @@ local vector3 = {
 }
 
 local MT = {
-    __add = vector3.add,
-    __sub = vector3.subtract,
+    __add = vector2.add,
+    __sub = vector2.subtract,
     __index = {
-        toTable = vector3.toTable,
-        toVector = vector3.toVector,
-        cross = vector3.cross,
-        getLength = vector3.getLength,
-        normalise = vector3.normalise
+        toTable = vector2.toTable,
+        toVector = vector2.toVector,
+        getLength = vector2.getLength,
+        normalise = vector2.normalise
     },
-    __tostring = vector3.tostring,
-    __mul = vector3.mult
+    __tostring = vector2.tostring,
+    __mul = vector2.mult
 }
 
-function vec2(x,y,z)
+function vec2(x,y)
     return setmetatable(
         {
             type = "vec2",
             x = x or 0,
-            y = y or 0,
-            z = z or 0
+            y = y or 0
         }, MT
     )
 end

@@ -1,5 +1,6 @@
 local vertArray = import("vertexArray")
 local indArray = import("indiceArray")
+
 import("vec2")
 import("vec3")
 import("vec4")
@@ -9,9 +10,14 @@ local cameraVector = vec3(0,0,-1)
 local lightSource = vec3(1,0,1)
 
 local model = {
-    rot = vec3(0,0,0),
+    rot = vec3(90,0,0),
     sca = vec3(1,1,1),
     tra = vec3(0,0,0)
+}
+
+cameraTransport = {
+    rot = vec3(0,0,0),
+    tra = vec3(0,0,-200)
 }
 
 local res
@@ -61,8 +67,8 @@ local function project(vec3input)
     local scal = projections.ScalMatrix(model.sca)
     local tran = projections.TranMatrix(model.tra)
     local rota = projections.RotaMatrix(model.rot)
-    local camRot = projections.RotaMatrix(vec3(0,0,0))
-    local camTra = projections.TranMatrix(vec3(0,0,-res.x/2-10))
+    local camRot = projections.RotaMatrix(cameraTransport.rot)
+    local camTra = projections.TranMatrix(cameraTransport.tra)
     local cam = camRot * camTra 
     local model = tran * rota * scal
     local PerspectiveMatrix = proj * cam * model
@@ -88,8 +94,20 @@ local function renderVertices(grid)
 end
 
 local function renderWireframe(grid)
-    for i, v in ipairs(indArray) do
-        
+    local polyList = {}
+    for i, v in ipairs(indArray.list) do
+        polyList[i] = {}
+        local currPoly = {}
+        currPoly.a = project(vertArray.list[v.x])
+        currPoly.b = project(vertArray.list[v.y])
+        currPoly.c = project(vertArray.list[v.z])
+        currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,res),currPoly.a.z)
+        currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,res),currPoly.b.z)
+        currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,res),currPoly.c.z)
+        paintutils.drawLine(currPoly.a.x, currPoly.a.y, currPoly.b.x, currPoly.b.y, 2^15)
+        paintutils.drawLine(currPoly.b.x, currPoly.b.y, currPoly.c.x, currPoly.c.y, 2^15)
+        paintutils.drawLine(currPoly.c.x, currPoly.c.y, currPoly.a.x, currPoly.a.y, 2^15)
+        -- debugLog({currPoly,"a"},"polies"..i)
     end
 end
 
@@ -158,6 +176,7 @@ local function renderPolygons(grid)
 end
 
 return {
+    cameraTransport = cameraTransport,
     renderWireframe = renderWireframe,
     model = model,
     projections = projections,

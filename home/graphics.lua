@@ -13,7 +13,9 @@ local tres = {}
 local key
 local debugMode = false
 local gameLoop = true
-local FPS = 10
+local FPS = 60
+
+local yAngle = 0
 
 -- side functions
 
@@ -22,7 +24,7 @@ local function userInput()
     while true do
 ---@diagnostic disable-next-line: undefined-field
         event, key, is_held = os.pullEvent("key")
-        if key == keys.right then
+        if key == keys.space then
             gameLoop = false
         end
     end
@@ -44,7 +46,22 @@ end
 local function setIndices()
     Shader.indArray.list = {
         vec3(1,2,3),
-        vec3(2,3,4)
+        vec3(2,4,3),
+
+        vec3(2,4,6),
+        vec3(6,8,4),
+        
+        vec3(4,3,8),
+        vec3(3,8,7),
+        
+        vec3(1,2,6),
+        vec3(6,5,1),
+        
+        vec3(5,7,1),
+        vec3(1,3,7),
+
+        vec3(6,5,8),
+        vec3(8,5,7),
     }
 end
 
@@ -66,15 +83,15 @@ local function Start()
     setVertices()
     setIndices()
     --Shader.renderPolygons(Grid)
-    debugLog(res,"res")
-    
+    -- debugLog(res,"res")
 end
 
 local function Update()
     Grid.init(res.x,res.y)
-    Shader.renderVertices(Grid)
+    -- Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
-    Shader.model.rot = Shader.model.rot + vec3(0,0,0)
+    Shader.renderWireframe(Grid)
+    Shader.model.rot = Shader.model.rot + vec3(1,1,1)
 end
 
 local function Closing()
