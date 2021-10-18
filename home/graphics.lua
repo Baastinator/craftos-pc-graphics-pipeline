@@ -4,6 +4,7 @@ local Grid = import("grid")
 local draw = import("draw")
 local Shader = import("shader")
 local paint = import("paint")
+import("shapes")
 import("vec3")
 --import("vec2")
 
@@ -33,7 +34,7 @@ end
 
 cube = {
     Vert = {
-        vec3(0,30,0),
+        vec3(0,0,0),
         vec3(26,15,0),
         vec3(8,15,25),
         vec3(-21,15,15),
@@ -62,15 +63,11 @@ cube = {
 }
 
 local function setVertices()
-    Shader.vertArray.list = {
-
-    }
+    Shader.vertArray.list = tPiece.ver
 end
 
 local function setIndices()
-    Shader.indArray.list = {
-        
-    } 
+    Shader.indArray.list = tPiece.ind
 end
 
 -- main functions
@@ -92,6 +89,7 @@ local function Start()
     setIndices()
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     --Shader.renderPolygons(Grid)
+    Shader.model.sca = vec3(2,2,2)
     -- debugLog(res,"res")
 end
 
@@ -100,9 +98,9 @@ local function Update()
     --Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
     Shader.renderWireframe(Grid)
-    Shader.model.rot = Shader.model.rot + vec3(5,5,0)
-    Shader.cameraTransport.tra = vec3(0,30,-100)
-    Shader.cameraTransport.rot = vec3(-15,0,0)
+    Shader.model.rot = Shader.model.rot + vec3(3,3,3)
+    Shader.cameraTransport.tra = vec3(0,100,-200)
+    Shader.cameraTransport.rot = vec3(-25,0,00)
 end
 
 local function Closing()
