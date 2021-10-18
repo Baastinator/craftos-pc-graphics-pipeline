@@ -4,7 +4,7 @@ local function init(X, Y)
     for y=1,Y do
         grid[y] = {}
         for x=1,X do
-            grid[y][x] = {lightLevel=0,Depth=math.huge}
+            grid[y][x] = {lightLevel=0,depth=math.huge}
         end
     end
 end
@@ -14,9 +14,14 @@ local function GetlightLevel(X,Y)
 end
 
 local function SetlightLevel(X,Y,Z,Value)
-    if Z < grid[Y][X].Depth then
+---@diagnostic disable-next-line: undefined-field
+    X = math.floor( (X+1) * table.getn(grid[1]) / 2)
+---@diagnostic disable-next-line: undefined-field
+    Y = math.floor( (Y+1) * table.getn(grid) / 2)
+    debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
+    if Z < grid[Y][X].depth then
         grid[Y][X].lightLevel = Value
-        grid[Y][X].Depth = Z
+        grid[Y][X].depth = Z
     end 
 end
 

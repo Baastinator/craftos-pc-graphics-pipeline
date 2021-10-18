@@ -8,6 +8,12 @@ import("mat4")
 local cameraVector = vec3(0,0,-1)
 local lightSource = vec3(1,0,1)
 
+local model = {
+    rot = vec3(0,0,0),
+    sca = vec3(1,1,1),
+    tra = vec3(0,0,0)
+}
+
 local res
 
 local projections = {
@@ -35,12 +41,15 @@ local projections = {
     end,
     RotaMatrix = function ( eulerVec3 )
         eulerVec3 = eulerVec3 * (math.pi/180)
-        local sx, sy, sz = math.sin(eulerVec3.x),math.sin(eulerVec3.y),math.sin(eulerVec3.z)
-        local cx, cy, cz = math.cos(eulerVec3.x),math.cos(eulerVec3.z),math.cos(eulerVec3.z)
+        local sg, sb, sa = math.sin(eulerVec3.x),math.sin(eulerVec3.y),math.sin(eulerVec3.z)
+        local cg, cb, ca = math.cos(eulerVec3.x),math.cos(eulerVec3.z),math.cos(eulerVec3.z)
         local m = mat4()
-        m[1] = {cy * cz                     ,-cy * sz                    ,sy       ,0}
-        m[2] = {(sx * sy * cz) + (cx * sz)  ,(-sx * sy * sz) + (cx * cz) ,-sx * cy ,0}
-        m[3] = {(-cx * sy * cz) + (sx * sz) ,(cx * sy * sz) + (sx * cz)  ,cx * cy  ,0}
+        -- m[1] = {ca*cb, (ca*sb*sg) - (sa*cg), (ca*sb*cg) + (sa*sg), 0}
+        -- m[2] = {sa*cb, (sa*sb*sg) + (ca*cg), (sa*sb*cg) - (ca*sg), 0}
+        -- m[3] = {-sb  , cb*sg           , cb*cg           , 0}
+        m[1] = {ca * cb                     ,-cb * sa                    ,sb       ,0}
+        m[2] = {(sg * sb * ca) + (cg * sa)  ,(-sg * sb * sa) + (cg * ca) ,-sg * cb ,0}
+        m[3] = {(-cg * sb * ca) + (sg * sa) ,(cg * sb * sa) + (sg * ca)  ,cg * cb  ,0}
         m[4] = {0                           ,0                           ,0        ,1}
         return m
     end
@@ -48,17 +57,18 @@ local projections = {
 
 local function project(vec3input)
     local input = vec3input:vec4()
-    local proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,10,100)
-    local scal = projections.ScalMatrix(vec3(1,1,1))
-    local tran = projections.TranMatrix(vec3(0,0,0))
-    local rota = projections.RotaMatrix(vec3(0,0,0))
-    local camRot = projections.TranMatrix(vec3(0,0,0))
-    local camTra = projections.TranMatrix(vec3(0,0,10))
-    local cam = camTra * camRot
+    local proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
+    local scal = projections.ScalMatrix(model.sca)
+    local tran = projections.TranMatrix(model.tra)
+    local rota = projections.RotaMatrix(model.rot)
+    local camRot = projections.RotaMatrix(vec3(0,0,0))
+    local camTra = projections.TranMatrix(vec3(0,0,-res.x/2-10))
+    local cam = camRot * camTra 
     local model = tran * rota * scal
     local PerspectiveMatrix = proj * cam * model
     local projectedVector = PerspectiveMatrix * input
-    return projectedVector
+    local projectedVector3 = vec3(projectedVector.x,projectedVector.y,projectedVector.z)/projectedVector.w
+    return projectedVector3
 end
 
 local function setRes(Res)
@@ -72,13 +82,15 @@ local function renderVertices(grid)
         debugT[i].v = v
         local pos = project(v)
         debugT[i].pos = pos
-        grid.SetlightLevel(pos.x,pos.y,1)
+        grid.SetlightLevel(pos.x,pos.y,pos.z,1)
     end
     -- debugLog(debugT,"rendvert")
 end
 
 local function renderWireframe(grid)
-    
+    for i, v in ipairs(indArray) do
+        
+    end
 end
 
 local function renderPolygons(grid)
@@ -146,6 +158,8 @@ local function renderPolygons(grid)
 end
 
 return {
+    renderWireframe = renderWireframe,
+    model = model,
     projections = projections,
     setRes = setRes,
     renderPolygons = renderPolygons,

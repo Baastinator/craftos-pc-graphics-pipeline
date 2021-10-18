@@ -62,6 +62,17 @@ local vector3 = {
     end,
     vector4 = function ( a )
         return vec4(a.x,a.y,a.z,1)
+    end,
+    divide = function ( a ,b )
+        if type(b) ~= "number" then
+            error("vec3 div: invalid input")
+        else
+            return vec3(
+                a.x / b,
+                a.y / b,
+                a.z / b
+            )
+        end
     end
 }
 
@@ -77,7 +88,8 @@ local MT = {
         vec4 = vector3.vector4
     },
     __tostring = vector3.tostring,
-    __mul = vector3.mult
+    __mul = vector3.mult,
+    __div = vector3.divide
 }
 
 function vec3(x,y,z)

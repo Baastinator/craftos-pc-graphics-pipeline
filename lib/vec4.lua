@@ -1,3 +1,4 @@
+--import("vec3")
 
 local vector4 =  {
     add = function(s,o)
@@ -68,6 +69,9 @@ local vector4 =  {
                 a.w / b
             )
         end
+    end,
+    vector3 = function (a)
+        return vec3(a.x,a.y,a.z)
     end
 }
 
@@ -80,7 +84,8 @@ local MT = {
         toTable = vector4.toTable,
         toVector = vector4.toVector,
         getLength = vector4.getLength,
-        normalise = vector4.normalise
+        normalise = vector4.normalise,
+        vec3 = vector4.vector3
     },
     __mul = vector4.mult,
     __tostring = vector4.tostring,

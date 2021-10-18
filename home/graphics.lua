@@ -30,17 +30,21 @@ end
 
 local function setVertices()
     Shader.vertArray.list = {
-        vec3(-0.5,-0.5,-0),
-        vec3(0.5,-0.5,-0),
-        vec3(-0.5,0.5,-0),
-        vec3(0.5,0.5,-0)
+        vec3(-30,-30,-30),
+        vec3(30,-30,-30),
+        vec3(-30,30,-30),
+        vec3(30,30,-30),
+        vec3(-30,-30,30),
+        vec3(30,-30,30),
+        vec3(-30,30,30),
+        vec3(30,30,30)
     }
 end
 
 local function setIndices()
     Shader.indArray.list = {
         vec3(1,2,3),
-        --vec3(2,3,4)
+        vec3(2,3,4)
     }
 end
 
@@ -67,7 +71,10 @@ local function Start()
 end
 
 local function Update()
+    Grid.init(res.x,res.y)
+    Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
+    Shader.model.rot = Shader.model.rot + vec3(0,0,0)
 end
 
 local function Closing()
