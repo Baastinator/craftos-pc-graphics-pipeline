@@ -63,11 +63,11 @@ cube = {
 }
 
 local function setVertices()
-    Shader.vertArray.list = tPiece.ver
+    Shader.vertArray.list = icosahedron.ver
 end
 
 local function setIndices()
-    Shader.indArray.list = tPiece.ind
+    Shader.indArray.list = icosahedron.ind
 end
 
 -- main functions
@@ -98,7 +98,7 @@ local function Update()
     --Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
     Shader.renderWireframe(Grid)
-    Shader.model.rot = Shader.model.rot + vec3(3,3,3)
+    Shader.model.rot = Shader.model.rot + vec3(1,1,1)
     Shader.cameraTransport.tra = vec3(0,100,-200)
     Shader.cameraTransport.rot = vec3(-25,0,00)
 end
