@@ -1,7 +1,7 @@
 local mathb = import("mathb")
 local Grid = import("grid")
 
-local PixelSize = 2 --KEEP AT 2
+local PixelSize = 1 --KEEP AT 2
 local debugVer = true
 
 local function lightLevelToCol(D, LinMode)

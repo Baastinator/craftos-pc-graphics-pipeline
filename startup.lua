@@ -1,1 +1,2 @@
-os.loadAPI("lib/SerializeRec.lua")
+shell.run("cd home")
+shell.run("clear")

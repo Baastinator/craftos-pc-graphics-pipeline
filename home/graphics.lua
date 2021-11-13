@@ -15,7 +15,12 @@ local tres = {}
 local key
 local debugMode = false
 local gameLoop = true
-local FPS = 60
+local FPS = 5
+local framesElapsed = 0
+
+local sigma = 10
+local beta = 8/3
+local ro = 10
 
 local yAngle = 0
 
@@ -63,11 +68,19 @@ cube = {
 }
 
 local function setVertices()
-    Shader.vertArray.list = icosahedron.ver
+    local a = {}
+    for x=-10,10,2 do
+        for y = -10, 10,2 do
+            for z = -10, 10,2 do
+                table.insert(a,vec3(x+0.1,y+0.1,z+0.1))
+            end
+        end
+    end
+    Shader.vertArray.list = a
 end
 
 local function setIndices()
-    Shader.indArray.list = icosahedron.ind
+    Shader.indArray.list = {}
 end
 
 -- main functions
@@ -90,17 +103,27 @@ local function Start()
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     --Shader.renderPolygons(Grid)
     Shader.model.sca = vec3(2,2,2)
+    Shader.cameraTransport.rot = vec3(90, 180, 0)
+    Shader.cameraTransport.tra = vec3(0, 200, -30)
     -- debugLog(res,"res")
 end
 
 local function Update()
     Grid.init(res.x,res.y)
-    --Shader.renderVertices(Grid)
+    Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
-    Shader.renderWireframe(Grid)
-    Shader.model.rot = Shader.model.rot + vec3(1,1,1)
-    Shader.cameraTransport.tra = vec3(0,100,-200)
-    Shader.cameraTransport.rot = vec3(-25,0,00)
+    -- Shader.renderWireframe(Grid)
+---@diagnostic disable-next-line: undefined-field
+    for i=1,table.getn(Shader.vertArray.list) do
+        local curr = Shader.vertArray.list[i]
+        local next = vec3(
+            (sigma*(curr.y - curr.x))/60,
+            (curr.x * (ro - curr.z) - curr.y)/60,
+            (curr.x * curr.y - beta * curr.z)/60
+        )
+        Shader.vertArray.list[i] = curr + next
+    end
+    -- Shader.model.rot = Shader.model.rot + vec3(0,0.5)
 end
 
 local function Closing()
@@ -122,6 +145,7 @@ local function main()
     while gameLoop do
         Update()
         sleep(1/FPS)
+        framesElapsed = framesElapsed + 1;
     end
     Closing()
 end
