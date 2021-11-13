@@ -29,10 +29,12 @@ local function SetlightLevel(X,Y,Z,Value,NDC)
         X,Y,Z = NDCtoScreen(X,Y,Z,vec2(res.x,res.y))
     end
     debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
-    if Z < grid[Y][X].depth then
-        grid[Y][X].lightLevel = Value
-        grid[Y][X].depth = Z
-    end 
+    if (X > 0 and Y > 0 and Y < res.y and X < res.x) then
+        if Z < grid[Y][X].depth then
+            grid[Y][X].lightLevel = Value
+            grid[Y][X].depth = Z
+        end 
+    end
 end
 
 local function fill(X,Y,W,H,L,D)

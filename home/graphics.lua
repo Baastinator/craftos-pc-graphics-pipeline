@@ -15,7 +15,7 @@ local tres = {}
 local key
 local debugMode = false
 local gameLoop = true
-local FPS = 5
+local FPS = 200
 local framesElapsed = 0
 
 local sigma = 10
@@ -68,15 +68,19 @@ cube = {
 }
 
 local function setVertices()
-    local a = {}
-    for x=-10,10,2 do
-        for y = -10, 10,2 do
-            for z = -10, 10,2 do
-                table.insert(a,vec3(x+0.1,y+0.1,z+0.1))
-            end
-        end
-    end
-    Shader.vertArray.list = a
+    -- local a = {}
+    -- local mult = 4
+    -- for x=-10,10,mult do
+    --     for y = -10, 10,mult do
+    --         for z = 10, 30,mult do
+    --             table.insert(a,vec3(x+0.1,y+0.1,z+0.1))
+    --         end
+    --     end
+    -- end
+    Shader.vertArray.list = {
+        vec3(1),
+        vec3(1.01)
+    }
 end
 
 local function setIndices()
@@ -102,9 +106,9 @@ local function Start()
     setIndices()
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     --Shader.renderPolygons(Grid)
-    Shader.model.sca = vec3(2,2,2)
-    Shader.cameraTransport.rot = vec3(90, 180, 0)
-    Shader.cameraTransport.tra = vec3(0, 200, -30)
+    Shader.model.sca = vec3(4,4,4)
+    Shader.cameraTransport.rot = vec3(90,180)
+    Shader.cameraTransport.tra = vec3(0, 100, -30)
     -- debugLog(res,"res")
 end
 
@@ -113,13 +117,14 @@ local function Update()
     Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
     -- Shader.renderWireframe(Grid)
+    local dt = 30
 ---@diagnostic disable-next-line: undefined-field
     for i=1,table.getn(Shader.vertArray.list) do
         local curr = Shader.vertArray.list[i]
         local next = vec3(
-            (sigma*(curr.y - curr.x))/60,
-            (curr.x * (ro - curr.z) - curr.y)/60,
-            (curr.x * curr.y - beta * curr.z)/60
+            (sigma*(curr.y - curr.x))/dt,
+            (curr.x * (ro - curr.z) - curr.y)/dt,
+            ((curr.x * curr.y) - (beta * curr.z))/dt
         )
         Shader.vertArray.list[i] = curr + next
     end
