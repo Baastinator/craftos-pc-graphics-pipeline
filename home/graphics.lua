@@ -68,15 +68,6 @@ cube = {
 }
 
 local function setVertices()
-    -- local a = {}
-    -- local mult = 4
-    -- for x=-10,10,mult do
-    --     for y = -10, 10,mult do
-    --         for z = 10, 30,mult do
-    --             table.insert(a,vec3(x+0.1,y+0.1,z+0.1))
-    --         end
-    --     end
-    -- end
     Shader.vertArray.list = {
         vec3(1),
         vec3(1.01)
