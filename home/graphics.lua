@@ -37,45 +37,13 @@ local function userInput()
     end
 end
 
-cube = {
-    Vert = {
-        vec3(0,0,0),
-        vec3(26,15,0),
-        vec3(8,15,25),
-        vec3(-21,15,15),
-        vec3(-21,15,-15),
-        vec3(8,15,-25),
-    },
-    Inde = {
-        vec3(3,2,4),
-        vec3(1,2,3),
-
-        vec3(2,4,6),
-        vec3(6,8,4),
-        
-        vec3(4,3,8),
-        vec3(3,8,7),
-        
-        vec3(5,2,6),
-        vec3(2,5,1),
-        
-        vec3(5,7,1),
-        vec3(1,3,7),
-
-        vec3(6,5,8),
-        vec3(8,5,7),
-    }
-}
 
 local function setVertices()
-    Shader.vertArray.list = {
-        vec3(1),
-        vec3(1.01)
-    }
+    Shader.vertArray.list = tetrahedra.ver
 end
 
 local function setIndices()
-    Shader.indArray.list = {}
+    Shader.indArray.list = tetrahedra.ind
 end
 
 -- main functions
@@ -95,31 +63,22 @@ end
 local function Start()
     setVertices()
     setIndices()
+    Shader.model.sca = vec3(2,2,2)
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     --Shader.renderPolygons(Grid)
-    Shader.model.sca = vec3(4,4,4)
-    Shader.cameraTransport.rot = vec3(90,180)
-    Shader.cameraTransport.tra = vec3(0, 100, -30)
     -- debugLog(res,"res")
 end
 
 local function Update()
     Grid.init(res.x,res.y)
+        Shader.model.rot = Shader.model.rot + vec3(
+            10,
+            10*math.cos(framesElapsed*math.pi/10),
+            10*math.cos(framesElapsed*math.pi/10+math.pi/3)
+        )
     Shader.renderVertices(Grid)
     draw.drawFromArray2D(0,0,Grid)
-    -- Shader.renderWireframe(Grid)
-    local dt = 30
----@diagnostic disable-next-line: undefined-field
-    for i=1,table.getn(Shader.vertArray.list) do
-        local curr = Shader.vertArray.list[i]
-        local next = vec3(
-            (sigma*(curr.y - curr.x))/dt,
-            (curr.x * (ro - curr.z) - curr.y)/dt,
-            ((curr.x * curr.y) - (beta * curr.z))/dt
-        )
-        Shader.vertArray.list[i] = curr + next
-    end
-    -- Shader.model.rot = Shader.model.rot + vec3(0,0.5)
+    Shader.renderWireframe(Grid)
 end
 
 local function Closing()

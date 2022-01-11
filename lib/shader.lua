@@ -61,17 +61,38 @@ local projections = {
     end
 }
 
+local sProjections = {}
+local oldData = {
+    modsca = model.sca,
+    modtra = model.tra,
+    modrot = model.rot,
+    camrot = cameraTransport.rot,
+    camtra = cameraTransport.tra
+}
+
 local function project(vec3input)
     local input = vec3input:vec4()
-    local proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
-    local scal = projections.ScalMatrix(model.sca)
-    local tran = projections.TranMatrix(model.tra)
-    local rota = projections.RotaMatrix(model.rot)
-    local camRot = projections.RotaMatrix(cameraTransport.rot)
-    local camTra = projections.TranMatrix(cameraTransport.tra)
-    local cam = camRot * camTra 
-    local model = tran * rota * scal
-    local PerspectiveMatrix = proj * cam * model
+    if (sProjections.proj == nil) then
+        sProjections.proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
+    end
+    if (sProjections.scal == nil or model.sca ~= oldData.modsca) then
+        sProjections.scal = projections.ScalMatrix(model.sca)
+    end
+    if (sProjections.tran == nil or model.tra ~= oldData.modtra) then
+        sProjections.tran = projections.TranMatrix(model.tra)
+    end
+    if (sProjections.rota == nil or model.rot ~= oldData.modrot) then
+        sProjections.rota = projections.RotaMatrix(model.rot)
+    end
+    if (sProjections.camRot == nil or cameraTransport.rot ~= oldData.camrot) then
+        sProjections.camRot = projections.RotaMatrix(cameraTransport.rot)
+    end
+    if (sProjections.camTra == nil or cameraTransport.tra ~= oldData.camrot) then
+        sProjections.camTra = projections.TranMatrix(cameraTransport.tra)
+    end
+    sProjections.cam = sProjections.camRot * sProjections.camTra 
+    sProjections.model = sProjections.tran * sProjections.rota * sProjections.scal
+    local PerspectiveMatrix = sProjections.proj * sProjections.cam * sProjections.model
     local projectedVector = PerspectiveMatrix * input
     local projectedVector3 = vec3(projectedVector.x,projectedVector.y,projectedVector.z)/projectedVector.w
     return projectedVector3
@@ -104,9 +125,9 @@ local function renderWireframe(grid)
         currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,currPoly.a.z,res))
         currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,currPoly.b.z,res))
         currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,currPoly.c.z,res))
-        paintutils.drawLine(currPoly.a.x*2, currPoly.a.y*2, currPoly.b.x*2, currPoly.b.y*2, 2^15)
-        paintutils.drawLine(currPoly.b.x*2, currPoly.b.y*2, currPoly.c.x*2, currPoly.c.y*2, 2^15)
-        paintutils.drawLine(currPoly.c.x*2, currPoly.c.y*2, currPoly.a.x*2, currPoly.a.y*2, 2^15)
+        paintutils.drawLine(currPoly.a.x*1, currPoly.a.y*1, currPoly.b.x*1, currPoly.b.y*1, 2^15)
+        paintutils.drawLine(currPoly.b.x*1, currPoly.b.y*1, currPoly.c.x*1, currPoly.c.y*1, 2^15)
+        paintutils.drawLine(currPoly.c.x*1, currPoly.c.y*1, currPoly.a.x*1, currPoly.a.y*1, 2^15)
         -- debugLog({currPoly,"a"},"polies"..i)
     end
 end
