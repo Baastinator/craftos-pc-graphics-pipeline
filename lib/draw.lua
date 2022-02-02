@@ -59,11 +59,11 @@ local function drawFromArray2D(x, y, Grid) -- FIX THIS
     --debugLog(oT,"DFA2D")
 end
 
-local function f(x)
-    return x*255/15--math.floor((-480*(0.83^(x+3.08)))+271)
-end
 
 local function setPalette()
+    local function f(x)
+        return x*255/15--math.floor((-480*(0.83^(x+3.08)))+271)
+    end
     for i=0,15 do
         term.setPaletteColor(2^i, colors.packRGB(f(i)/255,f(i)/255,f(i)/255))
     end

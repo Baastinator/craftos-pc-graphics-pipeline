@@ -1,3 +1,5 @@
+import("vec3")
+
 icosahedron = {
     ver = {
         vec3(0,30,0),
@@ -101,7 +103,7 @@ tPiece = {
     }
 }
 cube = {
-    Vert = {
+    ver = {
         vec3(0,0,0),
         vec3(26,15,0),
         vec3(8,15,25),
@@ -109,7 +111,7 @@ cube = {
         vec3(-21,15,-15),
         vec3(8,15,-25),
     },
-    Inde = {
+    ind = {
         vec3(3,2,4),
         vec3(1,2,3),
 
@@ -128,4 +130,62 @@ cube = {
         vec3(6,5,8),
         vec3(8,5,7),
     }
+}
+
+diamond = {
+    ver = function(count)
+        local T = {vec3(0,20)}
+        
+        for i=0,count-1 do
+            local yeet = vec3((20*math.cos((i/count)*2*math.pi)),-10,(20*math.sin((i/count)*2*math.pi)))
+            table.insert(T,yeet)
+        end
+
+        for i=0,count-1 do
+            local yeet = vec3((15*math.cos((i/count)*2*math.pi+math.pi/count)),-15,(15*math.sin((i/count)*2*math.pi+math.pi/count)))
+            table.insert(T,yeet)
+        end
+
+        return T
+    end,
+    ind = function(count)
+        local T = {}
+        for i=2,count do
+            table.insert(T,vec3(1,i,i+1))
+        end
+        table.insert(T,vec3(1,count+1,2))
+        for i=2,count do
+            table.insert(T,vec3(
+                count+i,
+                i,
+                i+1
+            ))
+        end
+        table.insert(T,vec3(count+1,2*count+1,2))
+        for i=2,count do
+            table.insert(T,vec3(
+                count+i,
+                count+i+1,
+                i+1
+            ))
+        end
+        table.insert(T,vec3(count+2,count+count+1,2))
+        return T
+        -- vec3(10,2,3),
+        -- vec3(10,11,3),
+        -- vec3(3,11,4),
+        -- vec3(12,11,4),
+        -- vec3(12,4,5),
+        -- vec3(12,13,5),
+        -- vec3(6,13,5),
+        -- vec3(6,13,14),
+        -- vec3(6,7,14),
+        -- vec3(15,7,14),
+        -- vec3(15,7,8),
+        -- vec3(15,16,8),
+        -- vec3(9,16,8),
+        -- vec3(9,16,18),
+        -- vec3(9,2,18),
+        -- vec3(10,2,18),
+    end
 }

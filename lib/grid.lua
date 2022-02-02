@@ -24,7 +24,11 @@ local function NDCtoScreen(X,Y,Z,res)
 end
 
 local function SetlightLevel(X,Y,Z,Value,NDC)
-    NDC = NDC or true
+    if (NDC == nil) then
+        NDC = true
+    else 
+        NDC = false
+    end
     if NDC then
         X,Y,Z = NDCtoScreen(X,Y,Z,vec2(res.x,res.y))
     end
@@ -46,6 +50,7 @@ local function fill(X,Y,W,H,L,D)
 end
 
 return {
+    res = res,
     NDCtoScreen = NDCtoScreen,
     fill = fill,
     GetlightLevel = GetlightLevel,

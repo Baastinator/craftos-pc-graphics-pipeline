@@ -1,21 +1,18 @@
-local vertArray = import("vertexArray")
-local indArray = import("indiceArray")
+local Paint = import("paint")
 
 import("vec2")
 import("vec3")
 import("vec4")
 import("mat4")
+import("List")
+import("tblclean")
 
 local cameraVector = vec3(0,0,-1)
 local lightSource = vec3(1,0,1)
 
-local model = {
-    rot = vec3(0,0,0),
-    sca = vec3(1,1,1),
-    tra = vec3(0,0,0)
-}
+local bodies = List("Body")
 
-cameraTransport = {
+local cameraTransport = {
     rot = vec3(0,0,0),
     tra = vec3(0,0,-200)
 }
@@ -47,55 +44,47 @@ local projections = {
     end,
     RotaMatrix = function ( eulerVec3 )
         eulerVec3 = eulerVec3 * (math.pi/180)
-        local sg, sb, sa = math.sin(eulerVec3.x),math.sin(eulerVec3.y),math.sin(eulerVec3.z)
-        local cg, cb, ca = math.cos(eulerVec3.x),math.cos(eulerVec3.y),math.cos(eulerVec3.z)
-        local m = mat4()
-        -- m[1] = {ca*cb, (ca*sb*sg) - (sa*cg), (ca*sb*cg) + (sa*sg), 0}
-        -- m[2] = {sa*cb, (sa*sb*sg) + (ca*cg), (sa*sb*cg) - (ca*sg), 0}
-        -- m[3] = {-sb  , cb*sg           , cb*cg           , 0}
-        m[1] = {ca * cb                     ,-cb * sa                    ,sb       ,0}
-        m[2] = {(sg * sb * ca) + (cg * sa)  ,(-sg * sb * sa) + (cg * ca) ,-sg * cb ,0}
-        m[3] = {(-cg * sb * ca) + (sg * sa) ,(cg * sb * sa) + (sg * ca)  ,cg * cb  ,0}
-        m[4] = {0                           ,0                           ,0        ,1}
+        local sx, sy, sz = math.sin(eulerVec3.x),math.sin(eulerVec3.y),math.sin(eulerVec3.z)
+        local cx, cy, cz = math.cos(eulerVec3.x),math.cos(eulerVec3.y),math.cos(eulerVec3.z)
+        local m = mat4().identity()
+        m[1] = {cz * cy                     ,-cy * sz                    ,sy       ,0}
+        m[2] = {(sx * sy * cz) + (cx * sz)  ,(-sx * sy * sz) + (cx * cz) ,-sx * cy ,0}
+        m[3] = {(-cx * sy * cz) + (sx * sz) ,(cx * sy * sz) + (sx * cz)  ,cx * cy  ,0}
         return m
     end
 }
 
-local sProjections = {}
-local oldData = {
-    modsca = model.sca,
-    modtra = model.tra,
-    modrot = model.rot,
-    camrot = cameraTransport.rot,
-    camtra = cameraTransport.tra
-}
-
-local function project(vec3input)
+local function project(vec3input,bodyID)
     local input = vec3input:vec4()
-    if (sProjections.proj == nil) then
-        sProjections.proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
-    end
-    if (sProjections.scal == nil or model.sca ~= oldData.modsca) then
-        sProjections.scal = projections.ScalMatrix(model.sca)
-    end
-    if (sProjections.tran == nil or model.tra ~= oldData.modtra) then
-        sProjections.tran = projections.TranMatrix(model.tra)
-    end
-    if (sProjections.rota == nil or model.rot ~= oldData.modrot) then
-        sProjections.rota = projections.RotaMatrix(model.rot)
-    end
-    if (sProjections.camRot == nil or cameraTransport.rot ~= oldData.camrot) then
-        sProjections.camRot = projections.RotaMatrix(cameraTransport.rot)
-    end
-    if (sProjections.camTra == nil or cameraTransport.tra ~= oldData.camrot) then
-        sProjections.camTra = projections.TranMatrix(cameraTransport.tra)
-    end
-    sProjections.cam = sProjections.camRot * sProjections.camTra 
-    sProjections.model = sProjections.tran * sProjections.rota * sProjections.scal
-    local PerspectiveMatrix = sProjections.proj * sProjections.cam * sProjections.model
+    local temp = {}
+    -- debugLog(clean({bodies,bID=bodyID}))
+    temp.proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
+    temp.scal = projections.ScalMatrix(bodies.list[bodyID].model.sca)
+    temp.tran = projections.TranMatrix(bodies.list[bodyID].model.tra)
+    temp.rota = projections.RotaMatrix(bodies.list[bodyID].model.rot)
+    temp.camRot = projections.RotaMatrix(cameraTransport.rot)
+    temp.camTra = projections.TranMatrix(cameraTransport.tra)
+    temp.cam = temp.camRot * temp.camTra 
+    temp.model = temp.tran * temp.rota * temp.scal
+    local PerspectiveMatrix = temp.proj * temp.cam * temp.model
     local projectedVector = PerspectiveMatrix * input
     local projectedVector3 = vec3(projectedVector.x,projectedVector.y,projectedVector.z)/projectedVector.w
     return projectedVector3
+end
+
+local function insertBodies(range)
+    for i, v in ipairs(range) do
+        bodies.add(v)
+    end
+    debugLog(clean(bodies),"bodies lol")
+end
+
+local function SetBodyTransform(ID,key,value)
+    bodies.list[ID].model[key] = value
+end
+
+local function GetBodyTransform(ID,key)
+    return bodies.list[ID].model[key]
 end
 
 local function setRes(Res)
@@ -103,108 +92,45 @@ local function setRes(Res)
 end
 
 local function renderVertices(grid)
-    local debugT = {}
-    for i, v in ipairs(vertArray.list) do
-        debugT[i] = {}
-        debugT[i].v = v
-        local pos = project(v)
-        debugT[i].pos = pos
-        grid.SetlightLevel(pos.x,pos.y,pos.z,1)
-    end
-    -- debugLog(debugT,"rendvert")
-end
-
-local function renderWireframe(grid)
-    local polyList = {}
-    for i, v in ipairs(indArray.list) do
-        polyList[i] = {}
-        local currPoly = {}
-        currPoly.a = project(vertArray.list[v.x])
-        currPoly.b = project(vertArray.list[v.y])
-        currPoly.c = project(vertArray.list[v.z])
-        currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,currPoly.a.z,res))
-        currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,currPoly.b.z,res))
-        currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,currPoly.c.z,res))
-        paintutils.drawLine(currPoly.a.x*1, currPoly.a.y*1, currPoly.b.x*1, currPoly.b.y*1, 2^15)
-        paintutils.drawLine(currPoly.b.x*1, currPoly.b.y*1, currPoly.c.x*1, currPoly.c.y*1, 2^15)
-        paintutils.drawLine(currPoly.c.x*1, currPoly.c.y*1, currPoly.a.x*1, currPoly.a.y*1, 2^15)
-        -- debugLog({currPoly,"a"},"polies"..i)
+    local Dlog = {}
+    for i, body in ipairs(bodies.list) do
+        for i2, v in ipairs(body.verArray.list) do
+            local pos = project(v,i)
+            grid.SetlightLevel(pos.x,pos.y,pos.z,1)
+            if i==2 then
+                Dlog[i2] = pos
+            end
+        end
+        -- debugLog(Dlog,"renderVert")
     end
 end
 
-local function renderPolygons(grid)
-    -- local polyList = {}
-    -- for i, v in ipairs(indArray.list) do
-    --     --realisePolys
-    --     polyList[i] = {}
-    --     local currPoly = {}
-    --     -- calculate and save poly vectors
-    --     currPoly.a = vec3.subtract(vertArray.list[v.y],vertArray.list[v.x])
-    --     currPoly.b = vec3.subtract(vertArray.list[v.z],vertArray.list[v.y])
-    --     currPoly.c = vec3.subtract(vertArray.list[v.x],vertArray.list[v.z])
-    --     polyList[i].raw = currPoly
-    --     polyList[i].raw.aStart = vertArray.list[v.x]
-        
-    --     -- project poly vectors into 2d
-    --     polyList[i].proj = {}
-    --     polyList[i].proj.a = project(polyList[i].raw.a)
-    --     -- polyList[i].proj.aStart = project(polyList[i].raw.aStart)
-    --     polyList[i].proj.b = project(polyList[i].raw.b)
-    --     polyList[i].proj.c = project(polyList[i].raw.c)
-        
-    --     --rasterization values
-    --     local rast = {}
-    --     local proj = {
-    --         a = project(polyList[i].raw.a),
-    --         aStart = project(polyList[i].raw.aStart),
-    --         b = project(polyList[i].raw.b),
-    --         c = project(polyList[i].raw.c)
-    --     }
-    --     rast.am = proj.a.x / proj.a.y
-    --     rast.bm = proj.b.x / proj.b.y
-    --     rast.cm = proj.c.x / proj.c.y
-    --     rast.as = project(vertArray.list[v.x])
-    --     rast.bs = vec2.add(rast.as,proj.a)
-    --     rast.cs = vec2.add(rast.bs,proj.b)
-    --     polyList[i].rast = rast
-    --     rast = nil
-    --     proj = nil
-
-    --     local cInv = vec3.scale(currPoly.c,-1)
-    --     polyList[i].normal = vec3.normalise(vec3.cross(cInv,currPoly.a))
-    --     if vec3.dot(polyList[i].normal,cameraVector) < 0 then
-    --         polyList[i].rendered = true
-    --         polyList[i].lighting = (vec3.dot(
-    --             vec3.normalise(polyList[i].normal),
-    --             vec3.normalise(lightSource)
-    --         ) + 1.5 ) / 2.5
-    --     else
-    --         polyList[i].rendered = false
-    --     end
-    --     if polyList[i].rendered == false then
-    --         polyList[i] = { rendered = false }
-    --     end
-    --     debugLog(polyList,"polys")
-    --     debugLog(currPoly,"currPoly")
-    -- end
-    -- local localGrid = {}
-    -- for i, v in ipairs(grid.grid) do
-    --     localGrid[i] = {}
-    --     for i2, v2 in ipairs(grid.grid[i]) do
-    --         localGrid[i][i2] = 0
-    --     end
-    -- end
+local function renderWireframe( grid, LL)
+    for bi, bv in ipairs(bodies.list) do
+        for i, v in ipairs(bv.indArray.list) do
+            local currPoly = {}
+            currPoly.a = project(bv.verArray.list[v.x],bi)
+            currPoly.b = project(bv.verArray.list[v.y],bi)
+            currPoly.c = project(bv.verArray.list[v.z],bi)
+            currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,currPoly.a.z,res))
+            currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,currPoly.b.z,res))
+            currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,currPoly.c.z,res))
+            Paint.drawLine(currPoly.a, currPoly.b, LL, grid)
+            Paint.drawLine(currPoly.b, currPoly.c, LL, grid)
+            Paint.drawLine(currPoly.c, currPoly.a, LL, grid)
+        end
+    end
 end
 
 return {
+    SetBodyTransform = SetBodyTransform,
+    GetBodyTransform = GetBodyTransform,
     cameraTransport = cameraTransport,
     renderWireframe = renderWireframe,
-    model = model,
     projections = projections,
     setRes = setRes,
-    renderPolygons = renderPolygons,
     renderVertices = renderVertices,
     project = project,
-    vertArray = vertArray,
-    indArray = indArray
+    bodies = bodies,
+    insertBodies = insertBodies
 }

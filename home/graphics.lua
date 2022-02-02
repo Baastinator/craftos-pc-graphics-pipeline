@@ -4,8 +4,9 @@ local Grid = import("grid")
 local draw = import("draw")
 local Shader = import("shader")
 local paint = import("paint")
-import("shapes")
+import("meshes")
 import("vec3")
+import("body")
 --import("vec2")
 
 -- globals
@@ -37,13 +38,11 @@ local function userInput()
     end
 end
 
-
-local function setVertices()
-    Shader.vertArray.list = tetrahedra.ver
-end
-
-local function setIndices()
-    Shader.indArray.list = tetrahedra.ind
+local function MakeDiamond(count)
+    local ver = diamond.ver(count)
+    local ind = diamond.ind(count)
+    
+    return Body(ver, ind)
 end
 
 -- main functions
@@ -61,24 +60,31 @@ local function Init()
 end
 
 local function Start()
-    setVertices()
-    setIndices()
-    Shader.model.sca = vec3(2,2,2)
+    Shader.cameraTransport.rot = vec3(-20)
+    Shader.cameraTransport.tra = vec3(0,60,-200)
+    Shader.insertBodies({Body(nil,nil,{tra=vec3(0,0,0)}),MakeDiamond(10)})
+    Shader.SetBodyTransform(1,"sca",vec3(4,4,4))
+    Shader.SetBodyTransform(2,"sca",vec3(2,2,2))
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
-    --Shader.renderPolygons(Grid)
     -- debugLog(res,"res")
 end
 
-local function Update()
+local function PreUpdate()
     Grid.init(res.x,res.y)
-        Shader.model.rot = Shader.model.rot + vec3(
-            10,
-            10*math.cos(framesElapsed*math.pi/10),
-            10*math.cos(framesElapsed*math.pi/10+math.pi/3)
-        )
-    Shader.renderVertices(Grid)
+end
+
+local function Update()
+    Shader.SetBodyTransform(2,"sca",vec3(2,2,2))
+    -- for i=-24,70 do
+    --     paint.drawLine(vec3(200,200+i,0),vec3(600,200+i,0),0.5,Grid)
+    -- end
+end
+
+local function Render()
+    -- Shader.renderVertices(Grid)
+    Shader.renderWireframe(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)
-    Shader.renderWireframe(Grid)
+    --Shader.renderPolygons(Grid)
 end
 
 local function Closing()
@@ -98,7 +104,9 @@ local function main()
     Init()
     Start()
     while gameLoop do
+        PreUpdate()
         Update()
+        Render()
         sleep(1/FPS)
         framesElapsed = framesElapsed + 1;
     end
