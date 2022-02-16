@@ -79,6 +79,10 @@ local function insertBodies(range)
     debugLog(clean(bodies),"bodies lol")
 end
 
+local function AddBodyTransform(ID,key,value)
+    bodies.list[ID].model[key] = bodies.list[ID].model[key] + value
+end
+
 local function SetBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = value
 end
@@ -123,6 +127,7 @@ local function renderWireframe( grid, LL)
 end
 
 return {
+    AddBodyTransform = AddBodyTransform,
     SetBodyTransform = SetBodyTransform,
     GetBodyTransform = GetBodyTransform,
     cameraTransport = cameraTransport,

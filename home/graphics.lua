@@ -7,6 +7,7 @@ local paint = import("paint")
 import("meshes")
 import("vec3")
 import("body")
+import("tblclean")
 --import("vec2")
 
 -- globals
@@ -62,9 +63,12 @@ end
 local function Start()
     Shader.cameraTransport.rot = vec3(-20)
     Shader.cameraTransport.tra = vec3(0,60,-200)
-    Shader.insertBodies({Body(nil,nil,{tra=vec3(0,0,0)}),MakeDiamond(10)})
-    Shader.SetBodyTransform(1,"sca",vec3(4,4,4))
-    Shader.SetBodyTransform(2,"sca",vec3(2,2,2))
+    local lBodies = {MakeDiamond(10)}
+    Shader.insertBodies(lBodies)
+    Shader.SetBodyTransform(1,"tra",vec3(-60))
+    Shader.SetBodyTransform(1,"tra",vec3(1,1,1))
+    debugLog(clean({Shader.bodies}),"bodies")
+    debugLog({"uhh"},"uhhh")
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     -- debugLog(res,"res")
 end
@@ -74,7 +78,7 @@ local function PreUpdate()
 end
 
 local function Update()
-    Shader.SetBodyTransform(2,"sca",vec3(2,2,2))
+    Shader.AddBodyTransform(1,"rot",vec3(2,-2))
     -- for i=-24,70 do
     --     paint.drawLine(vec3(200,200+i,0),vec3(600,200+i,0),0.5,Grid)
     -- end
@@ -107,7 +111,7 @@ local function main()
         PreUpdate()
         Update()
         Render()
-        sleep(1/FPS)
+        sleep(0)
         framesElapsed = framesElapsed + 1;
     end
     Closing()
