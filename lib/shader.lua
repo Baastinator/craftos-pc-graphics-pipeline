@@ -126,7 +126,16 @@ local function renderWireframe( grid, LL)
     end
 end
 
+local function renderPolygons(grid, LL)
+    for bi, bv in ipairs(bodies.list) do
+        for i, v in ipairs(bv.indArray.list) do
+            local currPoly
+        end
+    end
+end
+
 return {
+    renderPolygons = renderPolygons,
     AddBodyTransform = AddBodyTransform,
     SetBodyTransform = SetBodyTransform,
     GetBodyTransform = GetBodyTransform,

@@ -29,6 +29,21 @@ local yAngle = 0
 
 -- side functions
 
+local mesh = function() 
+    local function Noise(x,z)
+        return math.max(
+            50*perlin:noise(x/250,z/250,0.4) +
+            20*perlin:noise(x/100,z/100,0.4) +
+            10*perlin:noise(x/50,z/50,0.4) +
+            5*perlin:noise(x/25,z/25,0.4) +
+            2*perlin:noise(x/10,z/10,0.4),
+            -2
+        ) 
+    end
+    local mesh = makeFloorMesh(200,50,function(x,z) return -Noise(x,z) end)
+    return mesh
+end
+
 local function userInput()
     local event, is_held
     while true do
@@ -62,21 +77,18 @@ local function Init()
 end
 
 local function Start()
-    Shader.cameraTransport.rot = vec3(-40)
-    Shader.cameraTransport.tra = vec3(0,100,-150)
-    local function Noise(x,z)
-        return math.max(
-            50*perlin:noise(x/250,z/250,0.4) +
-            20*perlin:noise(x/100,z/100,0.4) +
-            10*perlin:noise(x/50,z/50,0.4) +
-            5*perlin:noise(x/25,z/25,0.4) +
-            2*perlin:noise(x/10,z/10,0.4),
-            -2
-        ) 
-    end
-    local lBodies = {makeFloorMesh(200,50,function(x,z) return -Noise(x,z) end)}
+    Shader.cameraTransport.rot = vec3()
+    Shader.cameraTransport.tra = vec3(0,0,-200)
+    local lBodies = {Body({
+        vec3(-10,10),
+        vec3(10,10),
+        vec3(10,-10)
+    },{
+        vec3(1,2,3)
+    }
+    )}
     Shader.insertBodies(lBodies)
-    Shader.SetBodyTransform(1,"rot",vec3(0,90,0))
+    Shader.SetBodyTransform(1,"sca",vec3(4,4,4))
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     -- debugLog(res,"res")
 end 
@@ -92,11 +104,12 @@ local function Update()
 end
 
 local function Render()
-    if (framesElapsed % 1000 == 0) then 
-    Shader.renderVertices(Grid)
+    -- if (framesElapsed % 1000 == 0) then
+    -- Shader.renderVertices(Grid)
     Shader.renderWireframe(Grid, 1)
+    Shader.renderPolygons(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)
-    end
+    -- end
     --Shader.renderPolygons(Grid)
 end
 

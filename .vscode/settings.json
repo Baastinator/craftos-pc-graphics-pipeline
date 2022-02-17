@@ -10,7 +10,8 @@
         "fs",
         "textutils",
         "debugLog",
-        "paintutils"
+        "paintutils",
+        "bit32"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
