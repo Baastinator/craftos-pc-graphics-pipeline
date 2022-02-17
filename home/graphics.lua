@@ -5,6 +5,7 @@ local draw = import("draw")
 local Shader = import("shader")
 local paint = import("paint")
 import("meshes")
+import("perlin")
 import("vec3")
 import("body")
 import("tblclean")
@@ -61,33 +62,41 @@ local function Init()
 end
 
 local function Start()
-    Shader.cameraTransport.rot = vec3(-20)
-    Shader.cameraTransport.tra = vec3(0,60,-200)
-    local lBodies = {MakeDiamond(10)}
+    Shader.cameraTransport.rot = vec3(-40)
+    Shader.cameraTransport.tra = vec3(0,100,-150)
+    local function Noise(x,z)
+        return math.max(
+            50*perlin:noise(x/250,z/250,0.4) +
+            20*perlin:noise(x/100,z/100,0.4) +
+            10*perlin:noise(x/50,z/50,0.4) +
+            5*perlin:noise(x/25,z/25,0.4) +
+            2*perlin:noise(x/10,z/10,0.4),
+            -2
+        ) 
+    end
+    local lBodies = {makeFloorMesh(200,50,function(x,z) return -Noise(x,z) end)}
     Shader.insertBodies(lBodies)
-    Shader.SetBodyTransform(1,"tra",vec3(-60))
-    Shader.SetBodyTransform(1,"tra",vec3(1,1,1))
-    debugLog(clean({Shader.bodies}),"bodies")
-    debugLog({"uhh"},"uhhh")
+    Shader.SetBodyTransform(1,"rot",vec3(0,90,0))
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     -- debugLog(res,"res")
-end
+end 
 
 local function PreUpdate()
     Grid.init(res.x,res.y)
 end
 
 local function Update()
-    Shader.AddBodyTransform(1,"rot",vec3(2,-2))
-    -- for i=-24,70 do
+        -- for i=-24,70 do
     --     paint.drawLine(vec3(200,200+i,0),vec3(600,200+i,0),0.5,Grid)
     -- end
 end
 
 local function Render()
-    -- Shader.renderVertices(Grid)
+    if (framesElapsed % 1000 == 0) then 
+    Shader.renderVertices(Grid)
     Shader.renderWireframe(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)
+    end
     --Shader.renderPolygons(Grid)
 end
 

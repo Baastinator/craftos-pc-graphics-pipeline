@@ -76,7 +76,7 @@ local function insertBodies(range)
     for i, v in ipairs(range) do
         bodies.add(v)
     end
-    debugLog(clean(bodies),"bodies lol")
+    -- debugLog(clean(bodies),"bodies lol")
 end
 
 local function AddBodyTransform(ID,key,value)

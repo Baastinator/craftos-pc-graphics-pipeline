@@ -1,4 +1,8 @@
 import("vec3")
+import("vec2")
+import("List")
+import("body")
+import("tblclean")
 
 icosahedron = {
     ver = {
@@ -189,3 +193,24 @@ diamond = {
         -- vec3(10,2,18),
     end
 }
+
+function makeFloorMesh(size, tileDensity, func)
+    if (not size) then error("makeFloorMesh: please insert size") end
+    if (not tileDensity) then error("makeFloorMesh: please insert tile density") end
+    if (not func) then func = function(x,z) return 0 end end
+    local verArray = {}
+    for x=-size/2,size/2,size/tileDensity do
+        for z=-size/2,size/2,size/tileDensity do
+            table.insert(verArray,vec3(x,func(x,z),z))
+        end
+    end
+    local indArray = {}
+    for x=1,tileDensity do
+        for z=1,tileDensity do
+            table.insert(indArray,vec3((z-1)*tileDensity+x+z-1,(z-1)*tileDensity+x+z,z+x+z*tileDensity))
+            table.insert(indArray,vec3((z-1)*tileDensity+x+z,x+z*tileDensity+z,x+z+z*tileDensity+1))
+        end
+    end
+    -- debugLog(clean(indArray),"indarray")
+    return Body(verArray,indArray)
+end
