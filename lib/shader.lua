@@ -20,7 +20,7 @@ local cameraTransport = {
 local res
 
 local projections = {
-    ProjMatrix = function(l,r,t,b,n,f)
+    PersMatrix = function(l,r,t,b,n,f)
         local m = mat4()
         m[1] = {(2*n)/(r-l) ,0           ,(r+l)/(r-l)  ,0             }
         m[2] = {0           ,(2*n)/(t-b) ,(t+b)/(t-b)  ,0             }
@@ -54,37 +54,100 @@ local projections = {
     end
 }
 
+local matrices = {}
+
+local function calculatePers()
+    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
+end
+
+local calculateMod = {
+    rot = function(Id)
+        matrices[Id].rota = projections.RotaMatrix(bodies.list[Id].model.rot)
+    end,
+    sca = function(Id)
+        matrices[Id].scal = projections.ScalMatrix(bodies.list[Id].model.sca)
+    end,
+    tra = function(Id)
+        matrices[Id].tran = projections.TranMatrix(bodies.list[Id].model.tra)
+    end
+}
+
+local calculateCam = {
+    tra = function()
+        matrices.camTra = projections.TranMatrix(cameraTransport.tra)
+    end,
+    rot = function()
+        matrices.camRot = projections.RotaMatrix(cameraTransport.rot)
+    end,
+    full = function()
+        matrices.cam = matrices.camRot * matrices.camTra
+    end
+}
+
+local function calculateModel(Id)
+    if (matrices[Id].tran == nil) then calculateMod.tra(Id) end
+    if (matrices[Id].rota == nil) then calculateMod.rota(Id) end
+    if (matrices[Id].scal == nil) then calculateMod.scal(Id) end
+    matrices[Id].model = matrices[Id].tran * matrices[Id].rota * matrices[Id].scal
+end
+
+
+local function calculateProj(Id)
+    matrices[Id].ProjectionMatrix = matrices.pers * matrices.cam * matrices[Id].model
+end
+
+local function calcMatrixFull(Id)
+    calculatePers()
+    calculateMod.sca(Id)
+    calculateMod.rot(Id)
+    calculateMod.tra(Id)
+    calculateCam.tra()
+    calculateCam.rot()
+    calculateCam.full()
+    calculateModel(Id)
+    calculateProj(Id)
+end
+
 local function project(vec3input,bodyID)
     local input = vec3input:vec4()
-    local temp = {}
-    -- debugLog(clean({bodies,bID=bodyID}))
-    temp.proj = projections.ProjMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
-    temp.scal = projections.ScalMatrix(bodies.list[bodyID].model.sca)
-    temp.tran = projections.TranMatrix(bodies.list[bodyID].model.tra)
-    temp.rota = projections.RotaMatrix(bodies.list[bodyID].model.rot)
-    temp.camRot = projections.RotaMatrix(cameraTransport.rot)
-    temp.camTra = projections.TranMatrix(cameraTransport.tra)
-    temp.cam = temp.camRot * temp.camTra 
-    temp.model = temp.tran * temp.rota * temp.scal
-    local PerspectiveMatrix = temp.proj * temp.cam * temp.model
-    local projectedVector = PerspectiveMatrix * input
-    local projectedVector3 = vec3(projectedVector.x,projectedVector.y,projectedVector.z)/projectedVector.w
+    if (matrices[bodyID].ProjectionMatrix == nil) then
+        calcMatrixFull(bodyID)
+    end
+    matrices.projectedVector = matrices[bodyID].ProjectionMatrix * input
+    local projectedVector3 = vec3(matrices.projectedVector.x,matrices.projectedVector.y,matrices.projectedVector.z)/matrices.projectedVector.w
     return projectedVector3
 end
 
 local function insertBodies(range)
     for i, v in ipairs(range) do
-        bodies.add(v)
+        local id = bodies.add(v)
+        matrices[id] = {}
     end
     -- debugLog(clean(bodies),"bodies lol")
 end
 
+local function SetCameraTransform(key, value)
+    cameraTransport[key] = value
+    calculateCam[key]()
+end
+
+local function AddCameraTransform(key, value)
+    cameraTransport[key] = cameraTransport[key] + value
+    calculateCam[key]()
+end
+
+local function GetCameraTransform(key)
+    return cameraTransport[key]
+end
+
 local function AddBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = bodies.list[ID].model[key] + value
+    calculateMod[key](ID)
 end
 
 local function SetBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = value
+    calculateMod[key](ID)
 end
 
 local function GetBodyTransform(ID,key)
@@ -127,9 +190,124 @@ local function renderWireframe( grid, LL)
 end
 
 local function renderPolygons(grid, LL)
+    local function Lines(a, b) 
+        local T = {}
+        T.minX = math.min(a.x, b.x)
+        if T.minX == a.x then
+            -- if start is small, start becomes min and end becomes max
+            T.minY = a.y
+            T.minZ = a.z
+            T.maxX = b.x
+            T.maxY = b.y
+            T.maxZ = b.z
+        else
+            -- otherwise, end becomes min and start becomes max 
+            -- y ignored, cool ideas
+            T.minY = b.y
+            T.minZ = b.z
+            T.maxX = a.x
+            T.maxY = a.y
+            T.maxZ = a.z
+        end
+        T.xDiff = T.maxX - T.minX
+        T.yDiff = T.maxY - T.minY
+        T.zDiff = T.maxZ - T.minZ
+        
+        if T.xDiff >= math.abs(T.yDiff) then
+            T.base = "x"
+            T.ySlope = T.yDiff / T.xDiff
+            T.zSlope = T.zDiff / T.xDiff
+        else
+            T.base = "y"
+            T.xSlope = T.xDiff / T.yDiff
+            T.zSlope = T.zDiff / T.yDiff
+        end
+        return T
+    end
+    function interpolate(S, E, y)
+        return S.x + (E.x - S.x) * (y - S.y) / (E.y - S.y)
+        --X(y) = xS + (xE - xS) * (y - yS) / (yE - yS)
+    end
+    local function sortPoints(a,b,c) 
+        if a.y > b.y and a.y > c.y then
+            if b.y > c.y then
+            
+            elseif b.y == c.y then
+                if b.x > c.x then
+
+                else
+                    b, c = c, b
+                end
+            else
+                b, c = c, b
+            end
+        elseif a.y == b.y then
+            if a.x > b.x then
+
+            else
+                a, b = b, a
+            end
+        elseif a.y == c.y then
+            if a.x > c.x then
+
+            else
+                a, b = b, a
+            end
+        elseif a.y < b.y then
+            if b.y < c.y then
+                a, c = c, a
+            elseif c.y < a.y then
+                a, b = b, a
+            else
+                a, b, c = b, c ,a
+            end
+        elseif a.y < c.y then
+            if a.y < b.y then
+                
+            end
+        end
+    end
+    local ab, bc, ca
     for bi, bv in ipairs(bodies.list) do
-        for i, v in ipairs(bv.indArray.list) do
-            local currPoly
+        for ii, iv in ipairs(bv.indArray.list) do
+            local currPoly = {}
+            currPoly.a = project(bv.verArray.list[iv.x],bi)
+            currPoly.b = project(bv.verArray.list[iv.y],bi)
+            currPoly.c = project(bv.verArray.list[iv.z],bi)
+
+            currPoly.a = vec3(grid.NDCtoScreen(currPoly.a.x,currPoly.a.y,currPoly.a.z,res))
+            currPoly.b = vec3(grid.NDCtoScreen(currPoly.b.x,currPoly.b.y,currPoly.b.z,res))
+            currPoly.c = vec3(grid.NDCtoScreen(currPoly.c.x,currPoly.c.y,currPoly.c.z,res))
+
+            currPoly.lines = {}
+
+            currPoly.lines.ab = Lines(currPoly.a, currPoly.b)
+            currPoly.lines.bc = Lines(currPoly.b, currPoly.c)
+            currPoly.lines.ca = Lines(currPoly.c, currPoly.a)
+
+            -- points topdown
+            -- if same y, left first
+
+
+            local a, b, c = sortPoints(currPoly.a, currPoly.b, currPoly.c)
+
+
+
+            ab = currPoly.lines.ab
+            bc = currPoly.lines.bc
+            ca = currPoly.lines.ca
+
+            if (ab.base == "x") then
+                for i=0,ab.xDiff do
+                    local reach = 1 
+                end
+            else
+                for i=0,ab.yDiff do
+
+                end
+            end
+
+            -- debugLog(currPoly,"currPoly")
         end
     end
 end
@@ -146,5 +324,8 @@ return {
     renderVertices = renderVertices,
     project = project,
     bodies = bodies,
-    insertBodies = insertBodies
+    insertBodies = insertBodies,
+    GetCameraTransform = GetCameraTransform,
+    SetCameraTransform = SetCameraTransform,
+    AddCameraTransform = AddCameraTransform
 }

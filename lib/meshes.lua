@@ -207,8 +207,21 @@ function makeFloorMesh(size, tileDensity, func)
     local indArray = {}
     for x=1,tileDensity do
         for z=1,tileDensity do
-            table.insert(indArray,vec3((z-1)*tileDensity+x+z-1,(z-1)*tileDensity+x+z,z+x+z*tileDensity))
-            table.insert(indArray,vec3((z-1)*tileDensity+x+z,x+z*tileDensity+z,x+z+z*tileDensity+1))
+            table.insert(
+                indArray,
+                vec3(
+                    (z-1)*tileDensity+x+z-1,
+                    (z-1)*tileDensity+x+z,
+                    z+x+z*tileDensity)
+                )
+            table.insert(
+                indArray,
+                vec3(
+                    (z-1)*tileDensity+x+z,
+                    x+z*tileDensity+z,
+                    x+z+z*tileDensity+1
+                )
+            )
         end
     end
     -- debugLog(clean(indArray),"indarray")

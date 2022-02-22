@@ -11,9 +11,11 @@
         "textutils",
         "debugLog",
         "paintutils",
-        "bit32"
+        "bit32",
+        "ffi"
     ],
     "Lua.diagnostics.disable": [
-        "lowercase-global"
+        "lowercase-global",
+        "undefined-field"
     ]
 }

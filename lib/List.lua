@@ -3,18 +3,21 @@ local Type = ""
 
 local function add(Element)
     table.insert(list,Element)
+    return table.getn(list)
 end
 
 local function get(index)
+    if table.getn(list) < index then error(Type.." List get: Outside range") end
     return list[index]
 end
 
 local function set(index, value)
+    if table.getn(list) < index then error(Type.." List set: Outside range") end
     list[index] = value
 end
 
 local function remove(index)
----@diagnostic disable-next-line: undefined-field
+    if table.getn(list) < index then error(Type.." List remove: Outside range") end
     for i=index,table.getn(list) do
         list[i] = list[i+1] or nil
     end

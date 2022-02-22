@@ -18,29 +18,54 @@ local tres = {}
 local key
 local debugMode = false
 local gameLoop = true
-local FPS = 200
+local FPS = 60
 local framesElapsed = 0
 
-local sigma = 10
-local beta = 8/3
-local ro = 10
-
-local yAngle = 0
+local time
 
 -- side functions
 
-local mesh = function() 
-    local function Noise(x,z)
-        return math.max(
-            50*perlin:noise(x/250,z/250,0.4) +
-            20*perlin:noise(x/100,z/100,0.4) +
-            10*perlin:noise(x/50,z/50,0.4) +
-            5*perlin:noise(x/25,z/25,0.4) +
-            2*perlin:noise(x/10,z/10,0.4),
-            -2
-        ) 
+local mesh = function()
+    local rand = {}
+    for i=1,7 do 
+        rand[i] = 10*math.random();
+    end 
+    local function sin(a) return math.sin(a/20) end
+    local function factorial(a)
+        local product = 1
+        for i = 1,a do
+            product = product * i
+        end
+        return product
+    end 
+    local function sum(a)
+
+        
+        local sum = 0
+        local n = 100
+        for i=1,n do
+            sum = sum + ((math.log(2)*(a/10))^i)/factorial(i)
+        end
+        return sum
     end
-    local mesh = makeFloorMesh(200,50,function(x,z) return -Noise(x,z) end)
+    local function Noise(x,z)
+        
+        x = -x
+        return (2/30)^(x)
+        + 30
+        -- math.max(
+        --     100*perlin:noise(x/500,z/500,rand[7]) +
+        --     50*perlin:noise(x/250,z/250,rand[6]) +
+        --     20*perlin:noise(x/100,z/100,rand[5]) +
+        --     10*perlin:noise(x/50,z/50,rand[4]) +
+        --     5*perlin:noise(x/25,z/25,rand[3]) +
+        --     2*perlin:noise(x/10,z/10,rand[2]) +
+        --     1*perlin:noise(x/5,z/5,rand[1])
+        --     - - (x*x+z*z)/5000
+        --     ,0
+        -- ) 
+    end
+    local mesh = makeFloorMesh(500,100,function(x,z) return -Noise(x,z) end)
     return mesh
 end
 
@@ -50,7 +75,7 @@ local function userInput()
 ---@diagnostic disable-next-line: undefined-field
         event, key, is_held = os.pullEvent("key")
         if key == keys.space then
-            gameLoop = false
+            gameLoop = false 
         end
     end
 end
@@ -65,6 +90,8 @@ end
 -- main functions
 
 local function Init()
+    time = os.time()
+    
     tres.x, tres.y = term.getSize(1)
     res.x = math.floor(tres.x / draw.PixelSize)
     res.y = math.floor(tres.y / draw.PixelSize)
@@ -77,20 +104,25 @@ local function Init()
 end
 
 local function Start()
-    Shader.cameraTransport.rot = vec3()
-    Shader.cameraTransport.tra = vec3(0,0,-200)
-    local lBodies = {Body({
-        vec3(-10,10),
-        vec3(10,10),
-        vec3(10,-10)
-    },{
-        vec3(1,2,3)
+    Shader.cameraTransport.rot = vec3(0,0,0)
+    Shader.cameraTransport.tra = vec3(0,0,-500)
+    local lBodies = {
+        mesh()
+    --[[    Body({
+            vec3(0,-10),
+            vec3(10,15),
+            vec3(-10,10)
+        },{
+            vec3(1,2,3)
+        })]]
     }
-    )}
     Shader.insertBodies(lBodies)
-    Shader.SetBodyTransform(1,"sca",vec3(4,4,4))
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
     -- debugLog(res,"res")
+    Shader.SetBodyTransform(1,"sca",vec3(1,1,1))
+    Shader.SetBodyTransform(1,"tra",vec3(0,0,0))
+    Shader.SetBodyTransform(1, "rot",vec3(-30))
+
 end 
 
 local function PreUpdate()
@@ -98,18 +130,20 @@ local function PreUpdate()
 end
 
 local function Update()
-        -- for i=-24,70 do
-    --     paint.drawLine(vec3(200,200+i,0),vec3(600,200+i,0),0.5,Grid)
-    -- end
 end
 
 local function Render()
-    -- if (framesElapsed % 1000 == 0) then
-    -- Shader.renderVertices(Grid)
+    if (framesElapsed % 100 == 0) then
+    -- debugLog(framesElapsed,"yeet")
+        -- Shader.renderVertices(Grid)
     Shader.renderWireframe(Grid, 1)
     Shader.renderPolygons(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)
-    -- end
+    end
+    if (framesElapsed == 0) then
+        local yeet = os.time()-time
+        debugLog(yeet,"startup")
+    end
     --Shader.renderPolygons(Grid)
 end
 
@@ -126,7 +160,7 @@ end
 
 -- main structure
 
-local function main()
+local function main() 
     Init()
     Start()
     while gameLoop do
