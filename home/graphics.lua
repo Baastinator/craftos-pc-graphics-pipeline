@@ -49,10 +49,7 @@ local mesh = function()
         return sum
     end
     local function Noise(x,z)
-        
-        x = -x
-        return (2/30)^(x)
-        + 30
+        return 400*math.exp(-(x/100)^2) * math.exp(-(z/100)^2)
         -- math.max(
         --     100*perlin:noise(x/500,z/500,rand[7]) +
         --     50*perlin:noise(x/250,z/250,rand[6]) +
@@ -65,7 +62,7 @@ local mesh = function()
         --     ,0
         -- ) 
     end
-    local mesh = makeFloorMesh(500,100,function(x,z) return -Noise(x,z) end)
+    local mesh = makeFloorMesh(500,50,function(x,z) return -Noise(x,z) end)
     return mesh
 end
 
@@ -133,18 +130,11 @@ local function Update()
 end
 
 local function Render()
-    if (framesElapsed % 100 == 0) then
     -- debugLog(framesElapsed,"yeet")
-        -- Shader.renderVertices(Grid)
+        Shader.renderVertices(Grid)
     Shader.renderWireframe(Grid, 1)
-    Shader.renderPolygons(Grid, 1)
+    -- Shader.renderPolygons(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)
-    end
-    if (framesElapsed == 0) then
-        local yeet = os.time()-time
-        debugLog(yeet,"startup")
-    end
-    --Shader.renderPolygons(Grid)
 end
 
 local function Closing()

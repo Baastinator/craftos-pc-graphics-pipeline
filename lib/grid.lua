@@ -23,21 +23,28 @@ local function NDCtoScreen(X,Y,Z,res)
     return X,Y,Z
 end
 
+local b = 0
+local a = {}
+
 local function SetlightLevel(X,Y,Z,Value,NDC)
     if (NDC == nil) then
         NDC = true
     else 
         NDC = false
     end
+    table.insert(a,{X=X,Y=Y,Z=Z,V=Value})
     if NDC then
         X,Y,Z = NDCtoScreen(X,Y,Z,vec2(res.x,res.y))
     end
-    --debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
-    if (X > 0 and Y > 0 and Y < res.y and X < res.x) then
+    b = b + 1
+    if (X > 0 and Y > 0 and Y < res.y and X < res.x and Z > -res.x/2 and Z < res.x/2) then
         if Z < grid[Y][X].depth then
             grid[Y][X].lightLevel = Value
             grid[Y][X].depth = Z
         end 
+    end
+    if (b == 100) then
+        debugLog(a,"setLL")
     end
 end
 

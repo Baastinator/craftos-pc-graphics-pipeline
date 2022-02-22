@@ -57,7 +57,7 @@ local projections = {
 local matrices = {}
 
 local function calculatePers()
-    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
+    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,res.x/2,-res.x/2)
 end
 
 local calculateMod = {
@@ -72,6 +72,10 @@ local calculateMod = {
     end
 }
 
+local calculateCamMat = function()
+    matrices.cam = matrices.camRot * matrices.camTra
+end
+
 local calculateCam = {
     tra = function()
         matrices.camTra = projections.TranMatrix(cameraTransport.tra)
@@ -79,15 +83,9 @@ local calculateCam = {
     rot = function()
         matrices.camRot = projections.RotaMatrix(cameraTransport.rot)
     end,
-    full = function()
-        matrices.cam = matrices.camRot * matrices.camTra
-    end
 }
 
 local function calculateModel(Id)
-    if (matrices[Id].tran == nil) then calculateMod.tra(Id) end
-    if (matrices[Id].rota == nil) then calculateMod.rota(Id) end
-    if (matrices[Id].scal == nil) then calculateMod.scal(Id) end
     matrices[Id].model = matrices[Id].tran * matrices[Id].rota * matrices[Id].scal
 end
 
@@ -103,7 +101,7 @@ local function calcMatrixFull(Id)
     calculateMod.tra(Id)
     calculateCam.tra()
     calculateCam.rot()
-    calculateCam.full()
+    calculateCamMat()
     calculateModel(Id)
     calculateProj(Id)
 end
@@ -122,6 +120,9 @@ local function insertBodies(range)
     for i, v in ipairs(range) do
         local id = bodies.add(v)
         matrices[id] = {}
+        calculateMod.tra(id)
+        calculateMod.sca(id)
+        calculateMod.rot(id)
     end
     -- debugLog(clean(bodies),"bodies lol")
 end
@@ -129,11 +130,13 @@ end
 local function SetCameraTransform(key, value)
     cameraTransport[key] = value
     calculateCam[key]()
+    calculateCamMat()
 end
 
 local function AddCameraTransform(key, value)
     cameraTransport[key] = cameraTransport[key] + value
     calculateCam[key]()
+    calculateCamMat()
 end
 
 local function GetCameraTransform(key)
@@ -143,11 +146,13 @@ end
 local function AddBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = bodies.list[ID].model[key] + value
     calculateMod[key](ID)
+    calculateModel(ID)
 end
 
 local function SetBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = value
     calculateMod[key](ID)
+    calculateModel(ID)
 end
 
 local function GetBodyTransform(ID,key)
@@ -168,8 +173,8 @@ local function renderVertices(grid)
                 Dlog[i2] = pos
             end
         end
-        -- debugLog(Dlog,"renderVert")
     end
+    debugLog(Dlog,"renderVert")
 end
 
 local function renderWireframe( grid, LL)
