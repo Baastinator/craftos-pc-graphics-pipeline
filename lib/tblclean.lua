@@ -7,6 +7,8 @@ function clean(input)
             else
                 output[k] = v
             end
+        else
+            output[k] = "function"
         end
     end
     return output

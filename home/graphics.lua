@@ -30,29 +30,9 @@ local mesh = function()
     for i=1,7 do 
         rand[i] = 10*math.random();
     end 
-    local function sin(a) return math.sin(a/20) end
-    local function factorial(a)
-        local product = 1
-        for i = 1,a do
-            product = product * i
-        end
-        return product
-    end 
-    local function sum(a)
-
-        
-        local sum = 0
-        local n = 100
-        for i=1,n do
-            sum = sum + ((math.log(2)*(a/10))^i)/factorial(i)
-        end
-        return sum
-    end
     local function Noise(x,z)
         
-        x = -x
-        return (2/30)^(x)
-        + 30
+        return 50*math.exp(-((x/50)^2+(z/50)^2))
         -- math.max(
         --     100*perlin:noise(x/500,z/500,rand[7]) +
         --     50*perlin:noise(x/250,z/250,rand[6]) +
@@ -61,11 +41,10 @@ local mesh = function()
         --     5*perlin:noise(x/25,z/25,rand[3]) +
         --     2*perlin:noise(x/10,z/10,rand[2]) +
         --     1*perlin:noise(x/5,z/5,rand[1])
-        --     - - (x*x+z*z)/5000
         --     ,0
         -- ) 
     end
-    local mesh = makeFloorMesh(500,100,function(x,z) return -Noise(x,z) end)
+    local mesh = makeFloorMesh(300,100,function(x,z) return -Noise(x,z) end)
     return mesh
 end
 
@@ -90,8 +69,7 @@ end
 -- main functions
 
 local function Init()
-    time = os.time()
-    
+    time =  ccemux.milliTime()
     tres.x, tres.y = term.getSize(1)
     res.x = math.floor(tres.x / draw.PixelSize)
     res.y = math.floor(tres.y / draw.PixelSize)
@@ -105,16 +83,17 @@ end
 
 local function Start()
     Shader.cameraTransport.rot = vec3(0,0,0)
-    Shader.cameraTransport.tra = vec3(0,0,-500)
+    Shader.cameraTransport.tra = vec3(0,0,-300)
     local lBodies = {
         mesh()
-    --[[    Body({
-            vec3(0,-10),
-            vec3(10,15),
-            vec3(-10,10)
-        },{
-            vec3(1,2,3)
-        })]]
+        -- MakeDiamond(30)
+        -- Body({
+        --     vec3(0,-10),
+        --     vec3(10,15),
+        --     vec3(-10,10)
+        -- },{
+        --     vec3(1,2,3)
+        -- })
     }
     Shader.insertBodies(lBodies)
     --paint.drawLine(vec3(30,30,30),vec3(60,60,60),1,Grid)
@@ -130,19 +109,20 @@ local function PreUpdate()
 end
 
 local function Update()
+    -- if (framesElapsed < 20) then
+        -- Shader.AddBodyTransform(1,"rot",vec3(0,0.3))
+    -- end
 end
 
 local function Render()
-    if (framesElapsed % 100 == 0) then
     -- debugLog(framesElapsed,"yeet")
         -- Shader.renderVertices(Grid)
     Shader.renderWireframe(Grid, 1)
-    Shader.renderPolygons(Grid, 1)
+    -- Shader.renderPolygons(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)
-    end
-    if (framesElapsed == 0) then
-        local yeet = os.time()-time
-        debugLog(yeet,"startup")
+    if (framesElapsed % 1 == 0) then
+        -- Shader.AddBodyTransform(1,"rot",vec3(0,1))
+        
     end
     --Shader.renderPolygons(Grid)
 end

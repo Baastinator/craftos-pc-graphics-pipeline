@@ -12,7 +12,8 @@
         "debugLog",
         "paintutils",
         "bit32",
-        "ffi"
+        "ffi",
+        "ccemux"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global",

@@ -32,7 +32,7 @@ local function SetlightLevel(X,Y,Z,Value,NDC)
     if NDC then
         X,Y,Z = NDCtoScreen(X,Y,Z,vec2(res.x,res.y))
     end
-    --debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
+    -- debugLog({X=X,Y=Y,Z=Z,V=Value},"setLL")
     if (X > 0 and Y > 0 and Y < res.y and X < res.x) then
         if Z < grid[Y][X].depth then
             grid[Y][X].lightLevel = Value

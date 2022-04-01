@@ -19,13 +19,25 @@ local cameraTransport = {
 
 local res
 
+local recalculate = false;
+local recalculateWhat = {
+    camrot = false,
+    camtra = false,
+    modrot = false,
+    modtra = false,
+    modsca = false,
+    model = false,
+    camera = false,
+    proj = false,
+}
+
 local projections = {
     PersMatrix = function(l,r,t,b,n,f)
         local m = mat4()
-        m[1] = {(2*n)/(r-l) ,0           ,(r+l)/(r-l)  ,0             }
-        m[2] = {0           ,(2*n)/(t-b) ,(t+b)/(t-b)  ,0             }
-        m[3] = {0           ,0           ,-(f+n)/(f-n) ,-(2*f*n)/(f-n)}
-        m[4] = {0           ,0           ,-1           ,0             }
+        m[1]  = (2*n)/(r-l)  m[3]  = (r+l)/(r-l) 
+        m[6]  = (2*n)/(t-b)  m[7]  = (t+b)/(t-b)
+        m[11] = -(f+n)/(f-n) m[12] = -(2*f*n)/(f-n)
+        m[15] = -1
         return m
     end,
     ScalMatrix = function (scalVec3)
@@ -47,9 +59,9 @@ local projections = {
         local sx, sy, sz = math.sin(eulerVec3.x),math.sin(eulerVec3.y),math.sin(eulerVec3.z)
         local cx, cy, cz = math.cos(eulerVec3.x),math.cos(eulerVec3.y),math.cos(eulerVec3.z)
         local m = mat4().identity()
-        m[1] = {cz * cy                     ,-cy * sz                    ,sy       ,0}
-        m[2] = {(sx * sy * cz) + (cx * sz)  ,(-sx * sy * sz) + (cx * cz) ,-sx * cy ,0}
-        m[3] = {(-cx * sy * cz) + (sx * sz) ,(cx * sy * sz) + (sx * cz)  ,cx * cy  ,0}
+        m[1] = cz * cy                     m[2]  = -cy * sz                    m[3]  = sy
+        m[5] = (sx * sy * cz) + (cx * sz)  m[6]  = (-sx * sy * sz) + (cx * cz) m[7]  = -sx * cy
+        m[9] = (-cx * sy * cz) + (sx * sz) m[10] = (cx * sy * sz) + (sx * cz)  m[11] = cx * cy
         return m
     end
 }
@@ -85,16 +97,13 @@ local calculateCam = {
 }
 
 local function calculateModel(Id)
-    if (matrices[Id].tran == nil) then calculateMod.tra(Id) end
-    if (matrices[Id].rota == nil) then calculateMod.rota(Id) end
-    if (matrices[Id].scal == nil) then calculateMod.scal(Id) end
     matrices[Id].model = matrices[Id].tran * matrices[Id].rota * matrices[Id].scal
 end
-
 
 local function calculateProj(Id)
     matrices[Id].ProjectionMatrix = matrices.pers * matrices.cam * matrices[Id].model
 end
+
 
 local function calcMatrixFull(Id)
     calculatePers()
@@ -108,10 +117,57 @@ local function calcMatrixFull(Id)
     calculateProj(Id)
 end
 
+local function calcMatrixSmart(ID)
+    local T = recalculateWhat
+    if (T.camrot) then
+        calculateCam.rot()
+        T.camrot = false
+        T.camera = true
+    end
+    if (T.camtra) then
+        calculateCam.tra()
+        T.camtra = false
+        T.camera = true
+    end
+    if (T.modrot) then
+        calculateMod.rot(ID)
+        T.modrot = false
+        T.model = true
+    end
+    if (T.modsca) then
+        calculateMod.sca(ID)
+        T.modsca = false
+        T.model = true
+    end
+    if (T.modtra) then
+        calculateMod.tra(ID)
+        T.modtra = false
+        T.model = true
+    end
+    if (T.camera) then
+        calculateCam.full()
+        T.camera = false
+        T.proj = true
+    end
+    if (T.model) then
+        calculateModel(ID)
+        T.model = false
+        T.proj = true
+    end
+    if (T.proj) then
+        calculateProj(ID)
+        T.proj = false
+    end
+    recalculate = false
+end
+
 local function project(vec3input,bodyID)
     local input = vec3input:vec4()
     if (matrices[bodyID].ProjectionMatrix == nil) then
         calcMatrixFull(bodyID)
+    end
+    if (recalculate) then
+        calcMatrixSmart(bodyID)
     end
     matrices.projectedVector = matrices[bodyID].ProjectionMatrix * input
     local projectedVector3 = vec3(matrices.projectedVector.x,matrices.projectedVector.y,matrices.projectedVector.z)/matrices.projectedVector.w
@@ -126,28 +182,57 @@ local function insertBodies(range)
     -- debugLog(clean(bodies),"bodies lol")
 end
 
+local function CamKeyToRecalcKey(key)
+    if (key == "tra") then return "camtra"
+    elseif (key == "rot") then return "camrot"
+    else error("CamKeyToRecalcKey: bad input");
+    end
+end
+
+
 local function SetCameraTransform(key, value)
     cameraTransport[key] = value
-    calculateCam[key]()
+    if (not recalculate) then
+        recalculate = true
+    end
+    recalculateWhat[CamKeyToRecalcKey(key)] = true
 end
 
 local function AddCameraTransform(key, value)
     cameraTransport[key] = cameraTransport[key] + value
-    calculateCam[key]()
+    if (not recalculate) then
+        recalculate = true
+    end
+    recalculateWhat[CamKeyToRecalcKey(key)] = true
 end
 
 local function GetCameraTransform(key)
     return cameraTransport[key]
+    
+end
+
+local function BodyKeyToRecalcKey(key)
+    if (key == "tra") then return "modtra"
+    elseif (key == "rot") then return "modrot"
+    elseif (key == "sca") then return "modsca"
+    else error("BodyKeyToRecalcKey: bad input");
+    end
 end
 
 local function AddBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = bodies.list[ID].model[key] + value
-    calculateMod[key](ID)
+    if (not recalculate) then
+        recalculate = true
+    end
+    recalculateWhat[BodyKeyToRecalcKey(key)] = true
 end
 
 local function SetBodyTransform(ID,key,value)
     bodies.list[ID].model[key] = value
-    calculateMod[key](ID)
+    if (not recalculate) then
+        recalculate = true
+    end
+    recalculateWhat[BodyKeyToRecalcKey(key)] = true
 end
 
 local function GetBodyTransform(ID,key)

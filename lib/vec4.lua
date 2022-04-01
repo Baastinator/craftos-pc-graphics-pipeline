@@ -1,4 +1,5 @@
 --import("vec3")
+import("tblclean")
 
 local vector4 =  {
     add = function(s,o)
