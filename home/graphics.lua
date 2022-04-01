@@ -116,7 +116,7 @@ end
 
 local function Render()
     -- debugLog(framesElapsed,"yeet")
-        -- Shader.renderVertices(Grid)
+        Shader.renderVertices(Grid)
     Shader.renderWireframe(Grid, 1)
     -- Shader.renderPolygons(Grid, 1)
     draw.drawFromArray2D(0,0,Grid)

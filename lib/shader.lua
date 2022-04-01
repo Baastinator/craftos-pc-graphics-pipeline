@@ -69,7 +69,7 @@ local projections = {
 local matrices = {}
 
 local function calculatePers()
-    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,-res.x/2,res.x/2)
+    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,res.x/2,-res.x/2)
 end
 
 local calculateMod = {
@@ -84,6 +84,10 @@ local calculateMod = {
     end
 }
 
+local calculateCamMat = function()
+    matrices.cam = matrices.camRot * matrices.camTra
+end
+
 local calculateCam = {
     tra = function()
         matrices.camTra = projections.TranMatrix(cameraTransport.tra)
@@ -91,9 +95,6 @@ local calculateCam = {
     rot = function()
         matrices.camRot = projections.RotaMatrix(cameraTransport.rot)
     end,
-    full = function()
-        matrices.cam = matrices.camRot * matrices.camTra
-    end
 }
 
 local function calculateModel(Id)
@@ -112,7 +113,7 @@ local function calcMatrixFull(Id)
     calculateMod.tra(Id)
     calculateCam.tra()
     calculateCam.rot()
-    calculateCam.full()
+    calculateCamMat()
     calculateModel(Id)
     calculateProj(Id)
 end
@@ -178,6 +179,9 @@ local function insertBodies(range)
     for i, v in ipairs(range) do
         local id = bodies.add(v)
         matrices[id] = {}
+        calculateMod.tra(id)
+        calculateMod.sca(id)
+        calculateMod.rot(id)
     end
     -- debugLog(clean(bodies),"bodies lol")
 end
@@ -253,8 +257,8 @@ local function renderVertices(grid)
                 Dlog[i2] = pos
             end
         end
-        -- debugLog(Dlog,"renderVert")
     end
+    debugLog(Dlog,"renderVert")
 end
 
 local function renderWireframe( grid, LL)
