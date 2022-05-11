@@ -227,3 +227,63 @@ function makeFloorMesh(size, tileDensity, func)
     -- debugLog(clean(indArray),"indarray")
     return Body(verArray,indArray)
 end
+
+
+function SetFloorMesh(shader, size, x, z, value, body)
+    if not body then body = 1 end
+    shader.bodies.list[body].verArray.list[(z-1)*(size+1)+x].y = value
+end
+
+function GetFloorMesh(shader, size, x, z, body)
+    if not body then body = 1 end
+    return shader.bodies.list[body].verArray.list[(z-1)*(size+1)+x].y
+end
+
+function GetFloorMesh2Dpos(shader, size, x, z, body)
+    if not body then body = 1 end
+    local s = 0 
+    local c = 0
+    if (z < size) then
+        s = s + GetFloorMesh(shader,size,x,z+1,body)
+        c = c + 1
+    end
+    if (z > 1) then
+        s = s + GetFloorMesh(shader,size,x,z-1,body)
+        c = c + 1
+    end
+    if (x < size) then
+        s = s + GetFloorMesh(shader,size,x+1,z,body)
+        c = c + 1
+    end
+    if (x > 1) then
+        s = s + GetFloorMesh(shader,size,x-1,z,body)
+        c = c + 1
+    end
+    return s/c
+end
+
+function GetFloorMesh2D(shader,size,body)
+    if not body then body = 1 end
+    local grid = {}
+    for z=1,size do
+        grid[z] = {}
+        for x=1,size do
+            grid[z][x] = GetFloorMesh2Dpos(shader,size,x,z,body)
+        end
+    end
+    -- debugLog(grid,"grid???")
+    return grid
+end
+
+function AddFloorMesh2D(shader, size, alpha, dt, grid, body) 
+    if not body then body = 1 end
+    if not grid then grid = GetFloorMesh2D(shader, size, body) end
+    for z=1,size do
+        for x=1,size do
+            -- debugLog(clean({grid=grid, dt=dt, alpha=alpha, z=z, x=x, shader=shader}),"wower")
+            SetFloorMesh(shader,size,x,z,
+                GetFloorMesh(shader,size,x,z,body)-alpha*grid[z][x]*dt,
+            body)
+        end
+    end
+end

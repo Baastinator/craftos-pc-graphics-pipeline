@@ -69,7 +69,7 @@ local projections = {
 local matrices = {}
 
 local function calculatePers()
-    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,-res.y/2,res.y/2,res.x/2,-res.x/2)
+    matrices.pers = projections.PersMatrix(-res.x/2,res.x/2,res.y/2,-res.y/2,res.x/2,-res.x/2)
 end
 
 local calculateMod = {
@@ -258,7 +258,6 @@ local function renderVertices(grid)
             end
         end
     end
-    debugLog(Dlog,"renderVert")
 end
 
 local function renderWireframe( grid, LL)
