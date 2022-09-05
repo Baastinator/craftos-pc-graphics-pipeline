@@ -1,18 +1,23 @@
 -- imports
 
-local Grid = import("grid")
-local draw = import("draw")
-local Shader = import("shader")
-local mathb = import("mathb")
-local paint = import("paint")
-import("meshes")
-import("perlin")
-import("vec3")
-import("body")
-import("tblclean")
+package.path = "/?.lua;/lib/?.lua"
+
+local Grid = require"grid"
+local draw = require"draw"
+local Shader = require"shader"
+local mathb = require"mathb"
+local paint = require"paint"
+local la = require"linalg"
+require"meshes"
+require"perlin"
+require"body"
+require"List"
+require"tblclean"
 --import("vec2")
 
 -- globals
+
+debug = {}
 
 local res = {}
 local tres = {}
@@ -79,7 +84,7 @@ local function Init()
     Shader.setRes(res)
     Grid.init(res.x,res.y)
     term.clear()
-    term.setGraphicsMode(1)
+    term.setGraphicsMode(2)
     draw.setPalette()
     term.drawPixels(0,0,1,tres.x,tres.y)
     if (debugMode) then
@@ -89,17 +94,16 @@ local function Init()
 end
 
 local function Start()
-    Shader.cameraTransport.rot = vec3(0,0,0)
-    Shader.cameraTransport.tra = vec3(0,0,-100)
+    Shader.cameraTransport.rot = la.vec{0,0,0}
+    Shader.cameraTransport.tra = la.vec{0,0,-100}
     local lBodies = {
-        mesh(10)
+        MakeDiamond(4)
     }
     Shader.insertBodies(lBodies)
-    Shader.SetBodyTransform(1,"sca",vec3(1,1,1))
-    Shader.SetBodyTransform(1,"tra",vec3(0,0,0))
-    Shader.SetBodyTransform(1, "rot",vec3(-30))
+    Shader.SetBodyTransform(1,"sca",la.vec{1,1,1})
+    Shader.SetBodyTransform(1,"tra",la.vec{0,0,0})
+    Shader.SetBodyTransform(1,"rot",la.vec{-30})
 
-    -- debugLog(GetFloorMesh2D(Shader,50),"floor2ndderi")
 
     if (debugMode) then
         time.PreUpdate = {}
@@ -120,12 +124,6 @@ local function PreUpdate()
 end
 
 local function Update()
-    -- if (framesElapsed < 20) then
-        -- Shader.AddBodyTransform(1,"rot",vec3(0,0.3))
-    -- end
-    -- if (framesElapsed % 3 == 0) then
-        AddFloorMesh2D(Shader, 10, 10, 1/100)
-    -- end
     if (debugMode) then
         time.Update[framesElapsed+1] = (ccemux.milliTime() - Time)/1000
         Time = ccemux.milliTime()
@@ -176,7 +174,6 @@ local function Closing()
         time.UpdateAverage = mathb.round(time.UpdateSum / #time.Update,3)
         time.UpdateSum, time.RenderSum, time.preUpdateSum = nil, nil, nil
         time.Update, time.Render, time.PreUpdate = nil, nil, nil
-        debugLog(time,"yet")
     end
 end
 
@@ -196,5 +193,12 @@ local function main()
 end
 
 -- execution
-
-parallel.waitForAny(main,userInput)
+local ok, err = pcall(parallel.waitForAny,main,userInput)
+if not ok then 
+    Closing()
+    printError((function()
+        local string = ""
+        for i = 1,15 do string = string.."\n" end
+        return string
+    end)()..textutils.serialize(clean(debug)).."\n"..err)
+end

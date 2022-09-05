@@ -1,5 +1,4 @@
-local mathb = import("mathb")
-local Grid = import("grid")
+local Grid = require("grid")
 
 local PixelSize = 1 --KEEP AT 2
 local debugVer = true
@@ -20,8 +19,8 @@ local function drawFromArray1D(x, y, T, Grid)
     local Pit = 0
     P.currLightLevel = nil
     ---@diagnostic disable-next-line: undefined-field
-    for i=1,table.getn(T) do
-        if lightLevelToCol(T[i].lightLevel,true) == P.currLightLevel then
+    for i,v in ipairs(T) do
+        if lightLevelToCol(v.lightLevel,true) == P.currLightLevel then
            if P[Pit][2] == nil then
                P[Pit][2] = 1
            end
@@ -29,7 +28,7 @@ local function drawFromArray1D(x, y, T, Grid)
 
         else
             Pit = Pit + 1 
-            P.currLightLevel = lightLevelToCol(T[i].lightLevel,true)
+            P.currLightLevel = lightLevelToCol(v.lightLevel,true)
             P[Pit] = {}
             P[Pit][1] = i
             P[Pit][2] = 1
@@ -38,12 +37,12 @@ local function drawFromArray1D(x, y, T, Grid)
     end
     P.currLightLevel = nil
 ---@diagnostic disable-next-line: undefined-field
-    for i=1,table.getn(P) do --NOCH NICHT FERTIG
+    for i,v in ipairs(P) do --NOCH NICHT FERTIG
         term.drawPixels(
-            (x+P[i][1])*PixelSize,
+            (x+v[1])*PixelSize,
             y*PixelSize,
-            2^P[i].col,
-            PixelSize*(P[i][2]),
+            2^v.col,
+            PixelSize*(v[2]),
             PixelSize
         )
     end
@@ -53,20 +52,20 @@ end
 local function drawFromArray2D(x, y, Grid) -- FIX THIS
     local oT = {} 
     ---@diagnostic disable-next-line: undefined-field
-    for y1=1,table.getn(Grid.grid) do
-        oT[y1] = drawFromArray1D(x-1,y+y1-1,Grid.grid[y1], Grid)
+    for y1,v in ipairs(Grid.grid) do
+        oT[y1] = drawFromArray1D(x-1,y+y1-1,v, Grid)
     end
-    --debugLog(oT,"DFA2D")
 end
 
-
 local function setPalette()
-    local function f(x)
-        return x*255/15--math.floor((-480*(0.83^(x+3.08)))+271)
+    -- 0 - 253 plain gray
+    for i=0,254 do
+        term.setPaletteColor(i, colors.packRGB(i/255,i/255,i/255))
     end
-    for i=0,15 do
-        term.setPaletteColor(2^i, colors.packRGB(f(i)/255,f(i)/255,f(i)/255))
-    end
+    -- 254 creature
+    term.setPaletteColor(254, colors.packRGB(0.75,0,0.75))
+    -- 255 food
+    term.setPaletteColor(255, colors.packRGB(0.5,0.5,0.5))
 end
 
 local function resetPalette()
@@ -74,10 +73,6 @@ local function resetPalette()
         local r, g, b = term.nativePaletteColor(2^i)
         term.setPaletteColor(2^i, colors.packRGB(r,g,b))
     end
-    term.setPaletteColor(colors.black,colors.packRGB(0,0,0))
-    term.setPaletteColor(colors.red,colors.packRGB(1,0,0))
-    term.setPaletteColor(colors.yellow,colors.packRGB(1,1,0))
-    term.setPaletteColor(colors.green,colors.packRGB(0,1,0))    
 end
 
 return {

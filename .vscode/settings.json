@@ -9,14 +9,15 @@
         "sleep",
         "fs",
         "textutils",
-        "debugLog",
         "paintutils",
         "bit32",
         "ffi",
-        "ccemux"
+        "ccemux",
+        "printError"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global",
-        "undefined-field"
+        "undefined-field",
+        "deprecated"
     ]
 }
